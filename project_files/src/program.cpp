@@ -1,6 +1,6 @@
 // Local headers
 #include "program.hpp"
-#include "gloom/gloom.hpp"
+#include "super_waddle/super_waddle.hpp"
 
 void runProgram( GLFWwindow* window ) {
     // Enable depth (Z) buffer (accept "closest" fragment)

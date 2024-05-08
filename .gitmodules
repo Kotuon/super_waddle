@@ -10,3 +10,7 @@
 	path = project_files/vendor/stb
 	url = https://github.com/nothings/stb.git
 	branch = master
+[submodule "project_files/vendor/glad"]
+	path = project_files/vendor/glad
+	url = https://github.com/Dav1dde/glad.git
+	branch = c
