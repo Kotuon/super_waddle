@@ -1,7 +1,3 @@
-[submodule "project_files/vendor/glad"]
-	path = project_files/vendor/glad
-	url = https://github.com/Dav1dde/glad.git
-	branch = c
 [submodule "project_files/vendor/glfw"]
 	path = project_files/vendor/glfw
 	url = https://github.com/glfw/glfw.git
