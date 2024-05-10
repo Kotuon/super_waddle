@@ -1,5 +1,6 @@
+
 // Local headers
-#include "program.hpp"
+#include "graphics.hpp"
 #include "super_waddle/super_waddle.hpp"
 
 void runProgram( GLFWwindow* window ) {
@@ -9,9 +10,21 @@ void runProgram( GLFWwindow* window ) {
 
     // Configure miscellaneous OpenGL settings
     glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
+    glFrontFace( GL_CCW );
+
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    glPointSize( 3.0 );
 
     // Set default colour after clearing the colour buffer
-    glClearColor( 0.3f, 0.5f, 0.8f, 1.0f );
+    glClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
+    glClearStencil( 0 );
+
+    // Set callbacks
+    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+    glfwSetCursorEnterCallback( window, cursor_enter_callback );
 
     // Set up your scene here (create Vertex Array Objects, etc.)
 
@@ -28,6 +41,20 @@ void runProgram( GLFWwindow* window ) {
 
         // Flip buffers
         glfwSwapBuffers( window );
+    }
+}
+
+void framebuffer_size_callback( GLFWwindow*, int width, int height ) {
+    glViewport( 0, 0, width, height );
+}
+
+void cursor_enter_callback( GLFWwindow* window, int entered ) {
+    if ( entered ) {
+        // The cursor entered the content area of the window
+        glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+        //cursorEntered = true;
+    } else {
+        // The cursor left the content area of the window
     }
 }
 

@@ -1,6 +1,6 @@
 // Local headers
 #include "super_waddle/super_waddle.hpp"
-#include "program.hpp"
+#include "graphics.hpp"
 
 // System headers
 #include <glad/glad.h>

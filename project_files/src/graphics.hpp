@@ -1,5 +1,6 @@
-#ifndef PROGRAM_HPP
-#define PROGRAM_HPP
+
+#ifndef GRAPHICS_HPP
+#define GRAPHICS_HPP
 #pragma once
 
 // System headers
@@ -12,6 +13,9 @@ void runProgram( GLFWwindow* window );
 
 // Function for handling keypresses
 void handleKeyboardInput( GLFWwindow* window );
+
+void framebuffer_size_callback( GLFWwindow* window, int width, int height );
+void cursor_enter_callback(GLFWwindow* window, int entered);
 
 // Checks for whether an OpenGL error occurred. If one did,
 // it prints out the error type and ID
