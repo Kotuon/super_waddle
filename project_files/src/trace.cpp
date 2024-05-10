@@ -23,8 +23,8 @@ void Trace::Message( std::string message, std::string filename, int linenumber )
 
     std::string output = filename.substr( 0, std::string::npos ) + "( " + std::to_string( linenumber ) + " )" + ": " + message;
 
-    trace_stream << output << std::endl;
-    std::cout << output << std::endl;
+    trace_stream << output << "\n";
+    std::cout << output << "\n";
 }
 
 Trace::~Trace() {

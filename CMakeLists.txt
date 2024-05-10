@@ -10,10 +10,12 @@ project (Super_Waddle)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set (CMAKE_VERBOSE_MAKEFILE 0) # 1 should be used for debugging
 set (CMAKE_SUPPRESS_REGENERATION TRUE) # Suppresses ZERO_CHECK
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}, -std=c++20")
+set (CMAKE_CXX_STANDARD 20)
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++20")
   if(NOT WIN32)
     set(GLAD_LIBRARIES dl)
   endif()
@@ -35,7 +37,8 @@ include_directories (project_files/src/
                      project_files/vendor/glad/include/
                      project_files/vendor/glfw/include/
                      project_files/vendor/glm/
-                     project_files/vendor/stb/)
+                     project_files/vendor/stb/
+                     project_files/vendor/fmt/include)
 
 #
 # Add files

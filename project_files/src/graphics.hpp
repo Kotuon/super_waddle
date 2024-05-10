@@ -7,15 +7,32 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <string>
+#include <memory>
+
+class Graphics {
+public:
+    bool Initialize();
+    void Update();
+    void Shutdown();
+
+    static void FrameBufferSizeCallback( GLFWwindow* Window, int Width, int Height );
+    static void CursorEnterCallback( GLFWwindow* Window, int Entered );
+
+    static void GLFWErrorCallback( int Error, const char* Description );
+    static Graphics& Instance();
+
+private:
+    GLFWwindow* window;
+};
 
 // Main OpenGL program
-void runProgram( GLFWwindow* window );
+void runProgram( GLFWwindow* Window );
 
 // Function for handling keypresses
-void handleKeyboardInput( GLFWwindow* window );
+void handleKeyboardInput( GLFWwindow* Window );
 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height );
-void cursor_enter_callback(GLFWwindow* window, int entered);
+void cursor_enter_callback( GLFWwindow* window, int entered );
 
 // Checks for whether an OpenGL error occurred. If one did,
 // it prints out the error type and ID
