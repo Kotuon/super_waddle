@@ -29,6 +29,7 @@ option (GLFW_BUILD_DOCS OFF)
 option (GLFW_BUILD_EXAMPLES OFF)
 option (GLFW_BUILD_TESTS OFF)
 add_subdirectory (project_files/vendor/glfw)
+add_subdirectory (project_files/vendor/fmt)
 
 #
 # Set include paths
@@ -78,6 +79,7 @@ add_executable (${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
 target_link_libraries (${PROJECT_NAME}
                        glfw
                        ${GLFW_LIBRARIES}
-                       ${GLAD_LIBRARIES})
+                       ${GLAD_LIBRARIES}
+                       fmt::fmt)
 set_target_properties (${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

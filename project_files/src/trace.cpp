@@ -10,6 +10,7 @@ Trace::Trace() {
     trace_stream.open( "trace.log", std::ofstream::out );
     if ( !trace_stream )
         std::cout << "Trace file wasn't opened successfully.\n";
+    std::cout << "Trace file was opened successfully.\n";
 }
 
 Trace& Trace::Instance() {

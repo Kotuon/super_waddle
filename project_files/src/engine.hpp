@@ -13,9 +13,13 @@ public:
     void Update();
     void Shutdown();
 
+    void TriggerShutdown();
+
     static Engine& Instance();
 
 private:
+    Engine();
+
     steady_clock::time_point last_time; //!< last update time
     steady_clock::time_point curr_time; //!< new update time
     steady_clock::duration time_taken;  //!< time between frames
