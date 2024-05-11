@@ -3,6 +3,7 @@
 #include "engine.hpp"
 #include "graphics.hpp"
 #include "trace.hpp"
+#include "input.hpp"
 
 Engine::Engine() {
 }
@@ -34,6 +35,7 @@ void Engine::Update() {
         accumulator += delta_time;
 
         // Non-fixed time step update calls
+        Input::Instance().Update();
         Graphics::Instance().Update();
 
         // Fixed time step update calls
