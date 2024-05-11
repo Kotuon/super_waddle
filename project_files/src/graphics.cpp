@@ -11,6 +11,7 @@
 #include "super_waddle/super_waddle.hpp"
 #include "trace.hpp"
 #include "engine.hpp"
+#include "input.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -91,7 +92,7 @@ bool Graphics::Initialize() {
     // Set callbacks
     glfwSetFramebufferSizeCallback( window, Graphics::FrameBufferSizeCallback );
     glfwSetCursorEnterCallback( window, Graphics::CursorEnterCallback );
-    glfwSetWindowCloseCallback( window, Graphics::CloseWindowCallback );
+    glfwSetWindowCloseCallback( window, Input::CloseWindowCallback );
 
     return true;
 }
@@ -104,7 +105,6 @@ void Graphics::Update() {
 
     // Handle other events
     glfwPollEvents();
-    handleKeyboardInput( window );
 
     // Flip buffers
     glfwSwapBuffers( window );
@@ -113,6 +113,10 @@ void Graphics::Update() {
 void Graphics::Shutdown() {
     // Terminate GLFW (no need to call glfwDestroyWindow)
     glfwTerminate();
+}
+
+GLFWwindow* Graphics::GetWindow() const {
+    return window;
 }
 
 void Graphics::FrameBufferSizeCallback( GLFWwindow*, int Width, int Height ) {
@@ -127,11 +131,6 @@ void Graphics::CursorEnterCallback( GLFWwindow*, int Entered ) {
     } else {
         // The cursor left the content area of the window
     }
-}
-
-void Graphics::CloseWindowCallback( GLFWwindow* Window ) {
-    glfwSetWindowShouldClose( Window, GL_TRUE );
-    Engine::Instance().TriggerShutdown();
 }
 
 void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
