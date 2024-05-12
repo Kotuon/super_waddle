@@ -4,6 +4,7 @@
 #include "graphics.hpp"
 #include "trace.hpp"
 #include "input.hpp"
+#include "camera.hpp"
 
 Engine::Engine() {
 }
@@ -17,6 +18,10 @@ bool Engine::Initialize() {
     if ( !Graphics::Instance().Initialize() ) {
         Trace::Instance().Message( "Graphics falied to initialize.", FILENAME, LINENUMBER );
         return false;
+    }
+
+    if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 0.f, 24.f ) ) ) {
+        Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
     Trace::Instance().Message( "Engine initialize successful.", FILENAME, LINENUMBER );
