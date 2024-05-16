@@ -18,7 +18,7 @@ public:
 private:
     Camera();
 
-    inline static const glm::vec3 GLOBAL_UP{ 0.f, 1.f, 0.f };
+    inline static constexpr glm::vec3 GLOBAL_UP{ 0.f, 1.f, 0.f };
 
     glm::mat4 view_matrix;
 

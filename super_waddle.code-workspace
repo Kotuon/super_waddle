@@ -73,7 +73,27 @@
             "xloctime": "cpp",
             "xstring": "cpp",
             "xtr1common": "cpp",
-            "xutility": "cpp"
+            "xutility": "cpp",
+            "any": "cpp",
+            "bitset": "cpp",
+            "cfenv": "cpp",
+            "complex": "cpp",
+            "condition_variable": "cpp",
+            "coroutine": "cpp",
+            "deque": "cpp",
+            "expected": "cpp",
+            "filesystem": "cpp",
+            "map": "cpp",
+            "numeric": "cpp",
+            "queue": "cpp",
+            "ranges": "cpp",
+            "set": "cpp",
+            "source_location": "cpp",
+            "span": "cpp",
+            "stack": "cpp",
+            "typeindex": "cpp",
+            "variant": "cpp",
+            "xtree": "cpp"
         }
     }
 }
