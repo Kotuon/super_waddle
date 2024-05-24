@@ -15,6 +15,8 @@ public:
 
     static Camera& Instance();
 
+    static void Movement( glm::vec3 MovementInput );
+
 private:
     Camera();
 
@@ -28,6 +30,8 @@ private:
     glm::vec3 up;
 
     glm::vec3 rotation;
+
+    float speed = 1.f;
 };
 
 #endif

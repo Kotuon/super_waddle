@@ -5,6 +5,10 @@
 #include "trace.hpp"
 #include "input.hpp"
 #include "camera.hpp"
+#include "shader_manager.hpp"
+#include "model_manager.hpp"
+#include "object_manager.hpp"
+#include "component.hpp"
 
 Engine::Engine() {
 }
@@ -24,6 +28,22 @@ bool Engine::Initialize() {
         Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
+    // ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
+    //                                      "shaders/phong_fragment.glsl" );
+    // ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
+    //                                      "shaders/instance_fragment.glsl" );
+    unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
+                                                               "shaders/base_fragment.glsl" );
+
+    // ModelManager::Instance().GetMesh( "models/sphere.obj", true );
+    // ModelManager::Instance().GetMesh( "models/cube.obj", false );
+
+    // Object& object = ObjectManager::Instance().CreateObject();
+    ObjectManager::Instance().CreateObject(
+        std::vector< Component* >{ new Physics,
+                                   ModelManager::Instance().GetModel( "models/cube.obj", baseShader, false ) },
+        "Container" );
+
     Trace::Instance().Message( "Engine initialize successful.", FILENAME, LINENUMBER );
 
     return true;
@@ -39,10 +59,6 @@ void Engine::Update() {
         last_time = curr_time;
         accumulator += delta_time;
 
-        // Non-fixed time step update calls
-        Input::Instance().Update();
-        Graphics::Instance().Update();
-
         // Fixed time step update calls
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
@@ -50,6 +66,15 @@ void Engine::Update() {
             accumulator -= fixed_time_step;
             time += fixed_time_step;
         }
+
+        // Non-fixed time step update calls
+        Input::Instance().Update();
+
+        // TODO: will be moved around
+        Camera::Instance().Update();
+        glm::mat4 view = Camera::Instance().GetViewMatrix();
+
+        Graphics::Instance().Update();
     }
 }
 

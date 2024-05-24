@@ -9,6 +9,10 @@
 
 // System includes
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+
+// Local includes
+#include "component.hpp"
 
 constexpr unsigned VERTEX_LIMIT = 2000;
 constexpr unsigned STRIDE = 8;
@@ -16,6 +20,9 @@ constexpr unsigned INSTANCE_STRIDE = 3;
 constexpr unsigned MAX_INSTANCES = 20000;
 
 struct Mesh {
+    Mesh();
+    Mesh( std::string ModelFileName );
+
     std::string model_file_name;
     int num_vertices;
     unsigned VAO;
@@ -24,29 +31,46 @@ struct Mesh {
     unsigned velocity_VBO;
 };
 
-struct Model {
-    glm::vec3 position;
-    glm::vec3 rotation;
-    Mesh* mesh;
-    float scale;
-    unsigned render_method;
-};
-
-class Model_Manager {
+class Model : public Component {
 public:
-    Model* GetModel( Mesh* mesh );
-    Mesh* GetMesh( std::string& ModelFileName, bool Instanced );
+    Model( Mesh* NewMesh, unsigned Shader );
+    void Draw();
 
-    static Model_Manager& Instance();
+    void SetMesh( Mesh* NewMesh );
+    Mesh* GetMesh() const;
+
+    void SetRenderMethod( unsigned RenderMethod );
+    unsigned GetRenderMethod() const;
+
+    void SetShader( unsigned NewShader );
+    unsigned GetShader() const;
+
+    static CType GetCType();
 
 private:
-    Model_Manager();
-    std::vector< float >* LoadObj( std::string& ModelFileName );
+    Model();
+    Mesh* mesh;
+    unsigned render_method;
+    unsigned shader;
+};
+
+class ModelManager {
+public:
+    Model* GetModel( const std::string& ModelFileName, unsigned Shader, bool Instanced );
+
+    static ModelManager& Instance();
+
+private:
+    ModelManager();
+
+    Mesh* GetMesh( const std::string& ModelFileName, bool Instanced );
+
+    std::vector< float >* LoadObj( const std::string& ModelFileName );
 
     void InsertData( std::vector< float >& vertices, char* data[3],
-                     std::array< glm::vec3, VERTEX_LIMIT > v,
-                     std::array< glm::vec3, VERTEX_LIMIT > vt,
-                     std::array< glm::vec3, VERTEX_LIMIT > vn );
+                     std::array< glm::vec3, VERTEX_LIMIT >& v,
+                     std::array< glm::vec3, VERTEX_LIMIT >& vt,
+                     std::array< glm::vec3, VERTEX_LIMIT >& vn );
 
     std::unordered_map< std::string, std::vector< float > > vertices_list;
     std::unordered_map< std::string, Mesh > mesh_list;

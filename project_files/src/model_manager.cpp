@@ -10,26 +10,70 @@
 #include "model_manager.hpp"
 #include "trace.hpp"
 
-Model_Manager::Model_Manager() {
+Mesh::Mesh() {
 }
 
-Model* Model_Manager::GetModel( Mesh* mesh ) {
-    auto it = model_list.find( mesh->model_file_name );
+Mesh::Mesh( std::string ModelFileName ) : model_file_name( ModelFileName ) {
+}
+
+Model::Model() : Component( CType::CModel ),
+                 mesh( nullptr ),
+                 render_method( GL_TRIANGLES ) {
+}
+
+Model::Model( Mesh* NewMesh, unsigned Shader ) : Component( CType::CModel ),
+                                                 mesh( NewMesh ),
+                                                 render_method( GL_TRIANGLES ),
+                                                 shader( Shader ) {
+}
+
+void Model::Draw() {
+}
+
+void Model::SetMesh( Mesh* NewMesh ) {
+    mesh = NewMesh;
+}
+
+Mesh* Model::GetMesh() const {
+    return mesh;
+}
+
+void Model::SetRenderMethod( unsigned RenderMethod ) {
+    render_method = RenderMethod;
+}
+
+unsigned Model::GetRenderMethod() const {
+    return render_method;
+}
+
+void Model::SetShader( unsigned NewShader ) {
+    shader = NewShader;
+}
+
+unsigned Model::GetShader() const {
+    return shader;
+}
+
+CType Model::GetCType() {
+    return CType::CModel;
+}
+
+ModelManager::ModelManager() {
+}
+
+Model* ModelManager::GetModel( const std::string& ModelFileName, unsigned Shader, bool Instanced ) {
+    auto it = model_list.find( ModelFileName );
     if ( it != model_list.end() ) {
         return &it->second;
     }
 
-    Model* model = &model_list[mesh->model_file_name];
-    model->mesh = mesh;
-    model->position = { 0.f, 0.f, -10.f };
-    model->rotation = { 0.f, 0.f, 0.f };
-    model->scale = 1;
-    model->render_method = GL_TRIANGLES;
+    Mesh* mesh = GetMesh( ModelFileName, Instanced );
+    auto modelIter = model_list.insert( { mesh->model_file_name, { mesh, Shader } } );
 
-    return model;
+    return &( modelIter.first )->second;
 }
 
-std::vector< float >* Model_Manager::LoadObj( std::string& ModelFileName ) {
+std::vector< float >* ModelManager::LoadObj( const std::string& ModelFileName ) {
     auto it = vertices_list.find( ModelFileName );
     if ( it != vertices_list.end() ) {
         return &it->second;
@@ -42,6 +86,9 @@ std::vector< float >* Model_Manager::LoadObj( std::string& ModelFileName ) {
                                    FILENAME, LINENUMBER );
         return nullptr;
     }
+
+    auto vertIter = vertices_list.insert( { ModelFileName, {} } );
+    std::vector< float >* verticesList = &( vertIter.first )->second;
 
     std::array< glm::vec3, VERTEX_LIMIT > v{};
     std::array< glm::vec3, VERTEX_LIMIT > vt{};
@@ -83,26 +130,30 @@ std::vector< float >* Model_Manager::LoadObj( std::string& ModelFileName ) {
             v3[1] = strtok_s( nullptr, "/", &temp );
             v3[2] = strtok_s( nullptr, "/", &temp );
 
-            InsertData( vertices_list[ModelFileName], v1, v, vt, vn );
-            InsertData( vertices_list[ModelFileName], v2, v, vt, vn );
-            InsertData( vertices_list[ModelFileName], v3, v, vt, vn );
+            InsertData( *verticesList, v1, v, vt, vn );
+            InsertData( *verticesList, v2, v, vt, vn );
+            InsertData( *verticesList, v3, v, vt, vn );
         }
     }
 
     fclose( file );
 
-    return &vertices_list[ModelFileName];
+    return verticesList;
 }
 
-Mesh* Model_Manager::GetMesh( std::string& ModelFileName, bool Instanced ) {
+Mesh* ModelManager::GetMesh( const std::string& ModelFileName, bool Instanced ) {
     auto it = mesh_list.find( ModelFileName );
     if ( it != mesh_list.end() ) {
         return &it->second;
     }
 
     std::vector< float >* vertices = LoadObj( ModelFileName );
-    Mesh* mesh = &mesh_list[ModelFileName];
-    mesh->model_file_name = ModelFileName;
+    if ( !vertices ) {
+        return nullptr;
+    }
+
+    auto meshIter = mesh_list.insert( { ModelFileName, ModelFileName } );
+    Mesh* mesh = &( meshIter.first )->second;
 
     mesh->num_vertices = static_cast< int >( vertices->size() / STRIDE );
 
@@ -149,10 +200,10 @@ Mesh* Model_Manager::GetMesh( std::string& ModelFileName, bool Instanced ) {
     return mesh;
 }
 
-void Model_Manager::InsertData( std::vector< float >& vertices, char* data[3],
-                                std::array< glm::vec3, VERTEX_LIMIT > v,
-                                std::array< glm::vec3, VERTEX_LIMIT > vt,
-                                std::array< glm::vec3, VERTEX_LIMIT > vn ) {
+void ModelManager::InsertData( std::vector< float >& vertices, char* data[3],
+                               std::array< glm::vec3, VERTEX_LIMIT >& v,
+                               std::array< glm::vec3, VERTEX_LIMIT >& vt,
+                               std::array< glm::vec3, VERTEX_LIMIT >& vn ) {
     vertices.push_back( v[atoi( data[0] ) - 1].x );
     vertices.push_back( v[atoi( data[0] ) - 1].y );
     vertices.push_back( v[atoi( data[0] ) - 1].z );
@@ -165,7 +216,7 @@ void Model_Manager::InsertData( std::vector< float >& vertices, char* data[3],
     vertices.push_back( vt[atoi( data[1] ) - 1].y );
 }
 
-Model_Manager& Model_Manager::Instance() {
-    static Model_Manager modelManagerInstance;
+ModelManager& ModelManager::Instance() {
+    static ModelManager modelManagerInstance;
     return modelManagerInstance;
 }

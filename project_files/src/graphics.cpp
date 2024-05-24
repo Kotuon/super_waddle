@@ -5,6 +5,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <fmt/core.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
 
 // Local headers
 #include "graphics.hpp"
@@ -12,6 +14,9 @@
 #include "trace.hpp"
 #include "engine.hpp"
 #include "input.hpp"
+#include "object_manager.hpp"
+#include "component.hpp"
+#include "model_manager.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -102,6 +107,36 @@ void Graphics::Update() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Draw your scene here
+    std::vector< Object >& objectList = ObjectManager::Instance().GetObjectList();
+    for ( Object& object : objectList ) {
+        Model* model = object.GetComponent< Model >();
+        if ( !model ) {
+            continue;
+        }
+
+        Transform* transform = object.GetComponent< Transform >();
+
+        glm::mat4 modelMatrix = glm::mat4( 1.f );
+        modelMatrix = glm::translate( modelMatrix, transform->GetPosition() );
+        modelMatrix = glm::rotate( modelMatrix,
+                                   ( transform->GetRotation().x / 180.f ) * glm::pi< float >(),
+                                   glm::vec3( 1, 0, 0 ) );
+        modelMatrix = glm::rotate( modelMatrix,
+                                   ( transform->GetRotation().y / 180.f ) * glm::pi< float >(),
+                                   glm::vec3( 0, 1, 0 ) );
+        modelMatrix = glm::rotate( modelMatrix,
+                                   ( transform->GetRotation().z / 180.f ) * glm::pi< float >(),
+                                   glm::vec3( 0, 0, 1 ) );
+        modelMatrix = glm::scale( modelMatrix, transform->GetScale() );
+
+        glUseProgram( model->GetShader() );
+
+        glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "model" ),
+                            1, GL_FALSE, &modelMatrix[0][0] );
+
+        glm::mat4 projection;
+        
+    }
 
     // Handle other events
     glfwPollEvents();

@@ -4,6 +4,7 @@
 
 // Local includes
 #include "camera.hpp"
+#include "input.hpp"
 
 Camera::Camera() {
 }
@@ -12,9 +13,18 @@ bool Camera::Initialize( glm::vec3 Position ) {
     position = Position;
     rotation = { -90.f, 0.f, 0.f };
 
+    Input::Instance().AddWASDCallback( Movement );
+
     UpdateVectors();
 
     return true;
+}
+
+void Camera::Update() {
+}
+
+void Camera::Movement( glm::vec3 MovementInput ) {
+    Camera::Instance().rotation.y += MovementInput.y * 0.22f;
 }
 
 void Camera::UpdateVectors() {
