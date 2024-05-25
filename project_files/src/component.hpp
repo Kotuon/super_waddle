@@ -13,7 +13,6 @@ public:
     enum CType {
         CTransform,
         CPhysics,
-        CCollision,
         CModel,
     };
 
@@ -77,11 +76,6 @@ public:
 private:
     glm::vec3 acceleration;
     glm::vec3 velocity;
-};
-
-class Collision : public Component {
-public:
-private:
 };
 
 #endif
