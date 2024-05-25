@@ -13,6 +13,9 @@ public:
     void Update();
     void Shutdown();
 
+    float GetDeltaTime() const;
+    float GetTotalTime() const;
+
     void TriggerShutdown();
 
     static Engine& Instance();

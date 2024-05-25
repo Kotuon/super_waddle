@@ -13,6 +13,9 @@ public:
 
     glm::mat4& GetViewMatrix();
 
+    float GetOrbitRadius() const;
+    void SetOrbitRadius( float OrbitRadius );
+
     static Camera& Instance();
 
     static void Movement( glm::vec3 MovementInput );
@@ -30,6 +33,8 @@ private:
     glm::vec3 up;
 
     glm::vec3 rotation;
+
+    float orbit_radius = 24.f;
 
     float speed = 1.f;
 };

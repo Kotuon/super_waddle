@@ -14,11 +14,6 @@ Engine::Engine() {
 }
 
 bool Engine::Initialize() {
-    last_time = steady_clock::now();
-    accumulator = 0.f;
-    time = 0.f;
-    is_running = true;
-
     if ( !Graphics::Instance().Initialize() ) {
         Trace::Instance().Message( "Graphics falied to initialize.", FILENAME, LINENUMBER );
         return false;
@@ -28,10 +23,10 @@ bool Engine::Initialize() {
         Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
-    // ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
-    //                                      "shaders/phong_fragment.glsl" );
-    // ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
-    //                                      "shaders/instance_fragment.glsl" );
+    ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
+                                         "shaders/phong_fragment.glsl" );
+    ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
+                                         "shaders/instance_fragment.glsl" );
     unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
                                                                "shaders/base_fragment.glsl" );
 
@@ -48,6 +43,12 @@ bool Engine::Initialize() {
 
     container.GetComponent< Transform >()->SetPosition( { 0.f, 0.f, -10.f } );
     container.GetComponent< Transform >()->SetScale( glm::vec3( 6 * 2 + 0.15f * 3 ) );
+    container.GetComponent< Transform >()->SetRotation( glm::vec3( 0.f ) );
+
+    last_time = steady_clock::now();
+    accumulator = 0.f;
+    time = 0.f;
+    is_running = true;
 
     Trace::Instance().Message( "Engine initialize successful.", FILENAME, LINENUMBER );
 
@@ -77,7 +78,6 @@ void Engine::Update() {
 
         // TODO: will be moved around
         Camera::Instance().Update();
-        glm::mat4 view = Camera::Instance().GetViewMatrix();
 
         Graphics::Instance().Update();
     }
@@ -89,6 +89,14 @@ void Engine::Shutdown() {
 
 void Engine::TriggerShutdown() {
     is_running = false;
+}
+
+float Engine::GetDeltaTime() const {
+    return delta_time;
+}
+
+float Engine::GetTotalTime() const {
+    return time;
 }
 
 Engine& Engine::Instance() {

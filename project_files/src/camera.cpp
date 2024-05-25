@@ -5,6 +5,7 @@
 // Local includes
 #include "camera.hpp"
 #include "input.hpp"
+#include "engine.hpp"
 
 Camera::Camera() {
 }
@@ -21,11 +22,19 @@ bool Camera::Initialize( glm::vec3 Position ) {
 }
 
 void Camera::Update() {
+    float universalAngle = Engine::Instance().GetTotalTime() * 4.f;
+    position = { glm::cos( glm::radians( universalAngle ) ) * orbit_radius,
+                 position.y,
+                 glm::sin( glm::radians( universalAngle ) ) * orbit_radius };
 }
 
 void Camera::Movement( glm::vec3 MovementInput ) {
-    Camera::Instance().rotation.y += MovementInput.y * 1.f;
-    Camera::Instance().rotation.x += MovementInput.x * 1.f;
+    Camera::Instance().position += MovementInput.y * 50.f * Engine::Instance().GetDeltaTime();
+    Camera::Instance().SetOrbitRadius( Camera::Instance().GetOrbitRadius() +
+                                       MovementInput.y * 2.f * Engine::Instance().GetDeltaTime() );
+
+    // Camera::Instance().rotation.y += MovementInput.y * 50.f * Engine::Instance().GetDeltaTime();
+    // Camera::Instance().rotation.x += MovementInput.x * 50.f * Engine::Instance().GetDeltaTime();
 }
 
 void Camera::UpdateVectors() {
@@ -45,6 +54,14 @@ glm::mat4& Camera::GetViewMatrix() {
     view_matrix = glm::lookAt( position, forward, up );
 
     return view_matrix;
+}
+
+float Camera::GetOrbitRadius() const {
+    return orbit_radius;
+}
+
+void Camera::SetOrbitRadius( float OrbitRadius ) {
+    orbit_radius = OrbitRadius;
 }
 
 Camera& Camera::Instance() {

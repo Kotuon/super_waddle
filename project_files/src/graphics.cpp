@@ -163,11 +163,11 @@ void Graphics::Update() {
         glBindVertexArray( 0 );
     }
 
-    // Handle other events
-    glfwPollEvents();
-
     // Flip buffers
     glfwSwapBuffers( window );
+
+    // Handle other events
+    glfwPollEvents();
 }
 
 void Graphics::Shutdown() {
