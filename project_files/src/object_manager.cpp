@@ -4,11 +4,9 @@
 #include "model_manager.hpp"
 
 Object::Object() : id( -1 ), name( "object" ) {
-    AddComponent( new Transform );
 }
 
 Object::Object( std::string Name ) : id( -1 ), name( Name ) {
-    AddComponent( new Transform );
 }
 
 Object::Object( const Object& Other ) : id( -1 ), name( Other.name ) {

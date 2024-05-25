@@ -33,6 +33,7 @@ typedef Component::CType CType;
 class Transform : public Component {
 public:
     Transform();
+    Transform( glm::vec3 Position, glm::vec3 Scale, glm::vec3 Rotation );
     Transform( const Transform& Other );
 
     void SetPosition( glm::vec3 Position );
@@ -50,10 +51,10 @@ public:
     static CType GetCType();
 
 private:
-    glm::vec3 position;
-    glm::vec3 old_position;
-    glm::vec3 scale;
-    glm::vec3 rotation;
+    glm::vec3 position{ 1.f, 1.f, 1.f };
+    glm::vec3 old_position{ 1.f, 1.f, 1.f };
+    glm::vec3 scale{ 1.f, 1.f, 1.f };
+    glm::vec3 rotation{ 1.f, 1.f, 1.f };
 };
 
 constexpr float GRAVITY = -15.0f;

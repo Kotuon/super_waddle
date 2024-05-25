@@ -21,6 +21,11 @@ CType Component::GetCType() const {
 Transform::Transform() : Component( CType::CTransform ) {
 }
 
+Transform::Transform( glm::vec3 Position, glm::vec3 Scale, glm::vec3 Rotation )
+    : Component( CType::CTransform ), position( Position ), old_position( 0.f ),
+      rotation( Rotation ) {
+}
+
 Transform::Transform( const Transform& Other ) : Component( CType::CTransform ) {
     *this = Other;
 }

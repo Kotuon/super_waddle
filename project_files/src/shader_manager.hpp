@@ -15,6 +15,8 @@ public:
 
     const char* ReadFile( const std::string& FileName );
 
+    const std::unordered_map< std::string, unsigned >& GetShaderList() const;
+
     static ShaderManager& Instance();
 
 private:

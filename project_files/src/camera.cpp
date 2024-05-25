@@ -24,7 +24,8 @@ void Camera::Update() {
 }
 
 void Camera::Movement( glm::vec3 MovementInput ) {
-    Camera::Instance().rotation.y += MovementInput.y * 0.22f;
+    Camera::Instance().rotation.y += MovementInput.y * 1.f;
+    Camera::Instance().rotation.x += MovementInput.x * 1.f;
 }
 
 void Camera::UpdateVectors() {

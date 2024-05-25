@@ -39,10 +39,15 @@ bool Engine::Initialize() {
     // ModelManager::Instance().GetMesh( "models/cube.obj", false );
 
     // Object& object = ObjectManager::Instance().CreateObject();
-    ObjectManager::Instance().CreateObject(
-        std::vector< Component* >{ new Physics,
-                                   ModelManager::Instance().GetModel( "models/cube.obj", baseShader, false ) },
+    Object& container = ObjectManager::Instance().CreateObject(
+        std::vector< Component* >{ new Transform,
+                                   new Physics,
+                                   ModelManager::Instance().GetModel( "models/cube.obj", baseShader,
+                                                                      false ) },
         "Container" );
+
+    container.GetComponent< Transform >()->SetPosition( { 0.f, 0.f, -10.f } );
+    container.GetComponent< Transform >()->SetScale( glm::vec3( 6 * 2 + 0.15f * 3 ) );
 
     Trace::Instance().Message( "Engine initialize successful.", FILENAME, LINENUMBER );
 

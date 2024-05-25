@@ -116,6 +116,10 @@ const char* ShaderManager::ReadFile( const std::string& FileName ) {
     return content.c_str();
 }
 
+const std::unordered_map< std::string, unsigned >& ShaderManager::GetShaderList() const {
+    return shader_list;
+}
+
 ShaderManager& ShaderManager::Instance() {
     static ShaderManager shaderManagerInstance;
     return shaderManagerInstance;

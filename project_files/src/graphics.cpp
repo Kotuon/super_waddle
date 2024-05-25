@@ -8,6 +8,9 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+
 // Local headers
 #include "graphics.hpp"
 #include "super_waddle/super_waddle.hpp"
@@ -17,6 +20,8 @@
 #include "object_manager.hpp"
 #include "component.hpp"
 #include "model_manager.hpp"
+#include "camera.hpp"
+#include "shader_manager.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -103,8 +108,16 @@ bool Graphics::Initialize() {
 }
 
 void Graphics::Update() {
+    glm::mat4 view = Camera::Instance().GetViewMatrix();
+    // TODO: setup shaders
+    for ( const auto& [key, value] : ShaderManager::Instance().GetShaderList() ) {
+        glUseProgram( value );
+        glUniformMatrix4fv( glGetUniformLocation( value, "view" ), 1, GL_FALSE, &view[0][0] );
+        glUseProgram( 0 );
+    }
+
     // Clear colour and depth buffers
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     // Draw your scene here
     std::vector< Object >& objectList = ObjectManager::Instance().GetObjectList();
@@ -119,13 +132,13 @@ void Graphics::Update() {
         glm::mat4 modelMatrix = glm::mat4( 1.f );
         modelMatrix = glm::translate( modelMatrix, transform->GetPosition() );
         modelMatrix = glm::rotate( modelMatrix,
-                                   ( transform->GetRotation().x / 180.f ) * glm::pi< float >(),
+                                   glm::radians( transform->GetRotation().x ),
                                    glm::vec3( 1, 0, 0 ) );
         modelMatrix = glm::rotate( modelMatrix,
-                                   ( transform->GetRotation().y / 180.f ) * glm::pi< float >(),
+                                   glm::radians( transform->GetRotation().y ),
                                    glm::vec3( 0, 1, 0 ) );
         modelMatrix = glm::rotate( modelMatrix,
-                                   ( transform->GetRotation().z / 180.f ) * glm::pi< float >(),
+                                   glm::radians( transform->GetRotation().z ),
                                    glm::vec3( 0, 0, 1 ) );
         modelMatrix = glm::scale( modelMatrix, transform->GetScale() );
 
@@ -134,8 +147,20 @@ void Graphics::Update() {
         glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "model" ),
                             1, GL_FALSE, &modelMatrix[0][0] );
 
-        glm::mat4 projection;
-        
+        glm::mat4 projection = glm::perspective< float >( glm::radians( 45.f ),
+                                                          windowWidth / windowHeight,
+                                                          0.1f, 100.0f );
+
+        glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
+                            1, GL_FALSE, &projection[0][0] );
+
+        glBindVertexArray( model->GetMesh()->VAO );
+
+        glDrawArrays( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices );
+
+        glUseProgram( 0 );
+
+        glBindVertexArray( 0 );
     }
 
     // Handle other events
