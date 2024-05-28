@@ -29,6 +29,7 @@ struct Mesh {
     unsigned VBO;
     unsigned position_VBO;
     unsigned velocity_VBO;
+    bool instanced;
 };
 
 class Model : public Component {

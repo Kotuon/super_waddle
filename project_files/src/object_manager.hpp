@@ -83,7 +83,6 @@ public:
 private:
     ObjectManager();
 
-    void CreateObjects( std::vector< Component* > Components, std::string Name, int Amount );
     std::vector< Object > object_list;
 };
 

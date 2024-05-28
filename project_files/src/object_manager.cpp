@@ -81,12 +81,6 @@ Object& ObjectManager::CreateObject( std::vector< Component* > Components, std::
     return newObject;
 }
 
-void ObjectManager::CreateObjects( std::vector< Component* > Components, std::string Name, int Amount ) {
-    for ( int i = 0; i < Amount; ++i ) {
-        CreateObject( Components, Name );
-    }
-}
-
 std::vector< Object >& ObjectManager::GetObjectList() {
     return object_list;
 }

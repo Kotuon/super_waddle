@@ -21,6 +21,17 @@ void Input::Update() {
         Engine::Instance().TriggerShutdown();
     }
 
+    if ( glfwGetKey( window, GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ) {
+        auto it = key_map.find( GLFW_KEY_LEFT_SHIFT );
+        if ( it != key_map.end() ) {
+            std::vector< void ( * )() > functions = it->second;
+
+            for ( auto func : functions ) {
+                func();
+            }
+        }
+    }
+
     glm::vec3 wasdInput{ 0.f };
     wasdInput.y = glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS ? 1.f : wasdInput.y;
     wasdInput.y = glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS ? -1.f : wasdInput.y;
@@ -72,4 +83,8 @@ void Input::AddWASDCallback( void ( *func )( glm::vec3 ) ) {
 
 void Input::AddArrowCallback( void ( *func )( glm::vec2 ) ) {
     arrow_callbacks.push_back( func );
+}
+
+void Input::AddCallback( int key, void ( *func )() ) {
+    key_map[key].push_back( func );
 }

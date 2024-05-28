@@ -155,6 +155,7 @@ Mesh* ModelManager::GetMesh( const std::string& ModelFileName, bool Instanced ) 
     auto meshIter = mesh_list.insert( { ModelFileName, ModelFileName } );
     Mesh* mesh = &( meshIter.first )->second;
 
+    mesh->instanced = Instanced;
     mesh->num_vertices = static_cast< int >( vertices->size() / STRIDE );
 
     glGenVertexArrays( 1, &( mesh->VAO ) );

@@ -13,6 +13,7 @@ Camera::Camera() {
 bool Camera::Initialize( glm::vec3 Position ) {
     position = Position;
     rotation = { -90.f, 0.f, 0.f };
+    orbit_radius = Position.z;
 
     Input::Instance().AddWASDCallback( Movement );
 
@@ -22,19 +23,21 @@ bool Camera::Initialize( glm::vec3 Position ) {
 }
 
 void Camera::Update() {
-    float universalAngle = Engine::Instance().GetTotalTime() * 4.f;
+    float universalAngle = Engine::Instance().GetTotalTime() * 10.f;
     position = { glm::cos( glm::radians( universalAngle ) ) * orbit_radius,
                  position.y,
                  glm::sin( glm::radians( universalAngle ) ) * orbit_radius };
+
+    rotation.x = universalAngle + 180.f;
 }
 
 void Camera::Movement( glm::vec3 MovementInput ) {
-    Camera::Instance().position += MovementInput.y * 50.f * Engine::Instance().GetDeltaTime();
-    Camera::Instance().SetOrbitRadius( Camera::Instance().GetOrbitRadius() +
-                                       MovementInput.y * 2.f * Engine::Instance().GetDeltaTime() );
+    Camera::Instance().position += Camera::Instance().up * MovementInput.y * 50.f *
+                                   Engine::Instance().GetDeltaTime();
 
-    // Camera::Instance().rotation.y += MovementInput.y * 50.f * Engine::Instance().GetDeltaTime();
-    // Camera::Instance().rotation.x += MovementInput.x * 50.f * Engine::Instance().GetDeltaTime();
+    Camera::Instance().rotation.y += -1.f * MovementInput.y * 75.f * Engine::Instance().GetDeltaTime();
+    Camera::Instance().SetOrbitRadius( Camera::Instance().GetOrbitRadius() +
+                                       ( -1.f * MovementInput.y * 2.f * Engine::Instance().GetDeltaTime() ) );
 }
 
 void Camera::UpdateVectors() {
@@ -51,7 +54,7 @@ glm::mat4& Camera::GetViewMatrix() {
     UpdateVectors();
 
     glm::vec3 look_direction = position + forward;
-    view_matrix = glm::lookAt( position, forward, up );
+    view_matrix = glm::lookAt( position, look_direction, up );
 
     return view_matrix;
 }

@@ -9,6 +9,7 @@
 #include "model_manager.hpp"
 #include "object_manager.hpp"
 #include "component.hpp"
+#include "verlet.hpp"
 
 Engine::Engine() {
 }
@@ -30,10 +31,6 @@ bool Engine::Initialize() {
     unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
                                                                "shaders/base_fragment.glsl" );
 
-    // ModelManager::Instance().GetMesh( "models/sphere.obj", true );
-    // ModelManager::Instance().GetMesh( "models/cube.obj", false );
-
-    // Object& object = ObjectManager::Instance().CreateObject();
     Object& container = ObjectManager::Instance().CreateObject(
         std::vector< Component* >{ new Transform,
                                    new Physics,
@@ -41,9 +38,12 @@ bool Engine::Initialize() {
                                                                       false ) },
         "Container" );
 
-    container.GetComponent< Transform >()->SetPosition( { 0.f, 0.f, -10.f } );
+
+    container.GetComponent< Transform >()->SetPosition( { 0.f, 0.f, 0.f } );
     container.GetComponent< Transform >()->SetScale( glm::vec3( 6 * 2 + 0.15f * 3 ) );
     container.GetComponent< Transform >()->SetRotation( glm::vec3( 0.f ) );
+
+    VerletManager::Instance().CreateVerlets( 1 );
 
     last_time = steady_clock::now();
     accumulator = 0.f;
@@ -65,6 +65,9 @@ void Engine::Update() {
         last_time = curr_time;
         accumulator += delta_time;
 
+        // Non-fixed time step update calls
+        Input::Instance().Update();
+
         // Fixed time step update calls
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
@@ -74,8 +77,6 @@ void Engine::Update() {
         }
 
         // Non-fixed time step update calls
-        Input::Instance().Update();
-
         // TODO: will be moved around
         Camera::Instance().Update();
 

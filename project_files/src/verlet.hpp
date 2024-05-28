@@ -3,13 +3,19 @@
 #define VERLET_HPP
 #pragma once
 
+// std includes
+#include <vector>
+
+class Object;
+
 struct VerletManager {
 public:
-    void CheckCollisions();
+    void CreateVerlets( int Amount );
 
     static VerletManager& Instance();
-private:
 
+private:
+    std::vector< Object* > verlet_list;
 };
 
 #endif
