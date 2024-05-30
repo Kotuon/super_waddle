@@ -11,14 +11,14 @@ void VerletManager::CreateVerlets( int Amount ) {
                                                                    "shaders/instance_fragment.glsl" );
 
     for ( int i = 0; i < Amount; ++i ) {
-        Object& object = ObjectManager::Instance().CreateObject(
+        Object* object = ObjectManager::Instance().CreateObject(
             std::vector< Component* >{ new Transform,
                                        new Physics,
                                        ModelManager::Instance().GetModel( "models/sphere.obj", instanceShader,
                                                                           false ) },
             "Verlet" );
 
-        verlet_list.push_back( &object );
+        verlet_list.push_back( object );
     }
 }
 

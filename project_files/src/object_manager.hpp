@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <memory>
 
 // Local includes
 #include "component.hpp"
@@ -24,6 +25,9 @@ public:
     void SetId( int Id );
     int GetId() const;
 
+    void SetName( std::string Name );
+    std::string GetName() const;
+
     void Update();
 
     bool HasComponent( CType Type );
@@ -36,7 +40,7 @@ public:
             return nullptr;
         }
         // Cast found component into correct type
-        return ( T* )found->second;
+        return reinterpret_cast< T* >( found->second );
     }
 
     template < typename T >
@@ -61,7 +65,7 @@ private:
             return nullptr;
         }
         // Cast found component into correct type
-        return ( T* )found->second;
+        return reinterpret_cast< T* >( found->second );
     }
 
     std::unordered_map< CType, Component* > components;
@@ -71,19 +75,21 @@ private:
 
 class ObjectManager {
 public:
-    Object& CreateObject( std::string Name );
-    Object& CreateObject( std::vector< Component* > Components, std::string Name );
+    Object* CreateObject( std::string Name );
+    Object* CreateObject( std::vector< Component* > Components, std::string Name );
 
-    std::vector< Object >& GetObjectList();
+    std::vector< std::unique_ptr< Object > >& GetObjectList();
 
     void DestoryObject( Object* ToDestory );
+
+    void Print() const;
 
     static ObjectManager& Instance();
 
 private:
     ObjectManager();
 
-    std::vector< Object > object_list;
+    std::vector< std::unique_ptr< Object > > object_list;
 };
 
 #endif

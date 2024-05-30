@@ -50,10 +50,10 @@ public:
     static CType GetCType();
 
 private:
-    glm::vec3 position{ 1.f, 1.f, 1.f };
-    glm::vec3 old_position{ 1.f, 1.f, 1.f };
+    glm::vec3 position{ 0.f, 0.f, 0.f };
+    glm::vec3 old_position{ 0.f, 0.f, 0.f };
     glm::vec3 scale{ 1.f, 1.f, 1.f };
-    glm::vec3 rotation{ 1.f, 1.f, 1.f };
+    glm::vec3 rotation{ 0.f, 0.f, 0.f };
 };
 
 constexpr float GRAVITY = -15.0f;

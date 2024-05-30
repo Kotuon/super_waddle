@@ -119,48 +119,14 @@ void Graphics::Update() {
     // Clear colour and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
+    glm::mat4 projection = glm::perspective< float >( glm::radians( 45.f ),
+                                                      windowWidth / windowHeight,
+                                                      0.1f, 100.0f );
+
     // Draw your scene here
-    std::vector< Object >& objectList = ObjectManager::Instance().GetObjectList();
-    for ( Object& object : objectList ) {
-        Model* model = object.GetComponent< Model >();
-        if ( !model ) {
-            continue;
-        }
-
-        Transform* transform = object.GetComponent< Transform >();
-
-        glm::mat4 modelMatrix = glm::mat4( 1.f );
-        modelMatrix = glm::translate( modelMatrix, transform->GetPosition() );
-        modelMatrix = glm::rotate( modelMatrix,
-                                   glm::radians( transform->GetRotation().x ),
-                                   glm::vec3( 1, 0, 0 ) );
-        modelMatrix = glm::rotate( modelMatrix,
-                                   glm::radians( transform->GetRotation().y ),
-                                   glm::vec3( 0, 1, 0 ) );
-        modelMatrix = glm::rotate( modelMatrix,
-                                   glm::radians( transform->GetRotation().z ),
-                                   glm::vec3( 0, 0, 1 ) );
-        modelMatrix = glm::scale( modelMatrix, transform->GetScale() );
-
-        glUseProgram( model->GetShader() );
-
-        glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "model" ),
-                            1, GL_FALSE, &modelMatrix[0][0] );
-
-        glm::mat4 projection = glm::perspective< float >( glm::radians( 45.f ),
-                                                          windowWidth / windowHeight,
-                                                          0.1f, 100.0f );
-
-        glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
-                            1, GL_FALSE, &projection[0][0] );
-
-        glBindVertexArray( model->GetMesh()->VAO );
-
-        glDrawArrays( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices );
-
-        glUseProgram( 0 );
-
-        glBindVertexArray( 0 );
+    std::vector< std::unique_ptr< Object > >& objectList = ObjectManager::Instance().GetObjectList();
+    for ( std::unique_ptr< Object >& object : objectList ) {
+        DrawNormal( object.get(), projection );
     }
 
     // Flip buffers
@@ -168,6 +134,44 @@ void Graphics::Update() {
 
     // Handle other events
     glfwPollEvents();
+}
+
+void Graphics::DrawNormal( Object* ObjectToDraw, glm::mat4& Projection ) {
+    Model* model = ObjectToDraw->GetComponent< Model >();
+    if ( !model || model->GetMesh()->instanced ) {
+        return;
+    }
+
+    Transform* transform = ObjectToDraw->GetComponent< Transform >();
+
+    glm::mat4 modelMatrix = glm::mat4( 1.f );
+    modelMatrix = glm::translate( modelMatrix, transform->GetPosition() );
+    modelMatrix = glm::rotate( modelMatrix,
+                               glm::radians( transform->GetRotation().x ),
+                               glm::vec3( 1, 0, 0 ) );
+    modelMatrix = glm::rotate( modelMatrix,
+                               glm::radians( transform->GetRotation().y ),
+                               glm::vec3( 0, 1, 0 ) );
+    modelMatrix = glm::rotate( modelMatrix,
+                               glm::radians( transform->GetRotation().z ),
+                               glm::vec3( 0, 0, 1 ) );
+    modelMatrix = glm::scale( modelMatrix, transform->GetScale() );
+
+    glUseProgram( model->GetShader() );
+
+    glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "model" ),
+                        1, GL_FALSE, &modelMatrix[0][0] );
+
+    glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
+                        1, GL_FALSE, &Projection[0][0] );
+
+    glBindVertexArray( model->GetMesh()->VAO );
+
+    glDrawArrays( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices );
+
+    glUseProgram( 0 );
+
+    glBindVertexArray( 0 );
 }
 
 void Graphics::Shutdown() {

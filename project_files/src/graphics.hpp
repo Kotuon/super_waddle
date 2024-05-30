@@ -8,6 +8,9 @@
 #include <glad/glad.h>
 #include <string>
 #include <memory>
+#include <glm/glm.hpp>
+
+class Object;
 
 class Graphics {
 public:
@@ -25,6 +28,9 @@ public:
 
 private:
     Graphics();
+
+    void DrawNormal( Object* ObjectToDraw, glm::mat4& Projection );
+    void DrawInstaned( Object* ObjectToDraw, glm::mat4& Projection );
 
     GLFWwindow* window;
 };
