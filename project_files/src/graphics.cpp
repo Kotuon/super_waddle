@@ -22,6 +22,7 @@
 #include "model_manager.hpp"
 #include "camera.hpp"
 #include "shader_manager.hpp"
+#include "verlet.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -128,6 +129,8 @@ void Graphics::Update() {
     for ( std::unique_ptr< Object >& object : objectList ) {
         DrawNormal( object.get(), projection );
     }
+
+    VerletManager::Instance().DrawVerlets( projection );
 
     // Flip buffers
     glfwSwapBuffers( window );
