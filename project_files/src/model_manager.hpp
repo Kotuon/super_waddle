@@ -35,6 +35,7 @@ struct Mesh {
 class Model : public Component {
 public:
     Model( Mesh* NewMesh, unsigned Shader );
+    Model( Mesh* NewMesh, unsigned RenderMethod, unsigned Shader );
     void Draw();
 
     void SetMesh( Mesh* NewMesh );
@@ -58,6 +59,8 @@ private:
 class ModelManager {
 public:
     Model* GetModel( const std::string& ModelFileName, unsigned Shader, bool Instanced );
+    Model* GetModel( const std::string& ModelFileName, unsigned RenderMethod,
+                     unsigned Shader, bool Instanced );
 
     static ModelManager& Instance();
 

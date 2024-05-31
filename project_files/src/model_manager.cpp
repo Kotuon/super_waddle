@@ -16,15 +16,24 @@ Mesh::Mesh() {
 Mesh::Mesh( std::string ModelFileName ) : model_file_name( ModelFileName ) {
 }
 
-Model::Model() : Component( CType::CModel ),
-                 mesh( nullptr ),
-                 render_method( GL_TRIANGLES ) {
+Model::Model()
+    : Component( CType::CModel ),
+      mesh( nullptr ),
+      render_method( GL_TRIANGLES ) {
 }
 
-Model::Model( Mesh* NewMesh, unsigned Shader ) : Component( CType::CModel ),
-                                                 mesh( NewMesh ),
-                                                 render_method( GL_TRIANGLES ),
-                                                 shader( Shader ) {
+Model::Model( Mesh* NewMesh, unsigned Shader )
+    : Component( CType::CModel ),
+      mesh( NewMesh ),
+      render_method( GL_TRIANGLES ),
+      shader( Shader ) {
+}
+
+Model::Model( Mesh* NewMesh, unsigned RenderMethod, unsigned Shader )
+    : Component( CType::CModel ),
+      mesh( NewMesh ),
+      render_method( RenderMethod ),
+      shader( Shader ) {
 }
 
 void Model::Draw() {
@@ -69,6 +78,20 @@ Model* ModelManager::GetModel( const std::string& ModelFileName, unsigned Shader
 
     Mesh* mesh = GetMesh( ModelFileName, Instanced );
     auto modelIter = model_list.insert( { mesh->model_file_name, { mesh, Shader } } );
+
+    return &( modelIter.first )->second;
+}
+
+Model* ModelManager::GetModel( const std::string& ModelFileName, unsigned RenderMethod,
+                               unsigned Shader, bool Instanced ) {
+    auto it = model_list.find( ModelFileName );
+    if ( it != model_list.end() ) {
+        return &it->second;
+    }
+
+    Mesh* mesh = GetMesh( ModelFileName, Instanced );
+    auto modelIter = model_list.insert( { mesh->model_file_name,
+                                          { mesh, RenderMethod, Shader } } );
 
     return &( modelIter.first )->second;
 }

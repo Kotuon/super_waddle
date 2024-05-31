@@ -31,21 +31,17 @@ bool Engine::Initialize() {
     unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
                                                                "shaders/base_fragment.glsl" );
 
-    // Object* container = ObjectManager::Instance().CreateObject(
-    //     std::vector< Component* >{ new Transform,
-    //                                new Physics,
-    //                                ModelManager::Instance().GetModel( "models/cube.obj", baseShader,
-    //                                                                   false ) },
-    //     "Container" );
+    ObjectManager::Instance().CreateObject(
+        std::vector< Component* >{ new Transform( glm::vec3( 0.f ), glm::vec3( 6 * 1.02f ),
+                                                  glm::vec3( 0.f ) ),
+                                   new Physics,
+                                   ModelManager::Instance().GetModel( "models/sphere.obj",
+                                                                      GL_POINTS,
+                                                                      baseShader,
+                                                                      false ) },
+        "Container" );
 
-    // ObjectManager::Instance().Print();
-
-    VerletManager::Instance().CreateVerlets( 1 );
-
-    // ObjectManager::Instance().Print();
-
-    // container->GetComponent< Transform >()->SetScale( glm::vec3( 6 * 2 + 0.15f * 3 ) );
-    // container->GetComponent< Transform >()->SetRotation( glm::vec3( 0.f ) );
+    VerletManager::Instance().CreateVerlets();
 
     last_time = steady_clock::now();
     accumulator = 0.f;

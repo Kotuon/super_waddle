@@ -1,22 +1,39 @@
 
+// System headers
+#include <GLFW/glfw3.h>
+
 // Local includes
 #include "verlet.hpp"
 #include "object_manager.hpp"
 #include "model_manager.hpp"
 #include "shader_manager.hpp"
 #include "trace.hpp"
+#include "input.hpp"
 
-void VerletManager::CreateVerlets( int Amount ) {
+void VerletManager::CreateVerlets() {
+    Input::Instance().AddCallback( GLFW_KEY_V, &AddVerlet );
+
     unsigned instanceShader = ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                                                    "shaders/instance_fragment.glsl" );
 
-    for ( int i = 0; i < Amount; ++i ) {
+    for ( int i = 0; i < max; ++i ) {
+        glm::vec3 startPosition{ glm::sin( i ) * 7.f,
+                                 rand() % ( 2 ) + 1,
+                                 glm::cos( i ) * 7.f };
+
         Object* object = ObjectManager::Instance().CreateObject(
-            std::vector< Component* >{ new Transform,
+            std::vector< Component* >{ new Transform( startPosition,
+                                                      glm::vec3( 0.15f ),
+                                                      glm::vec3( 0.f ) ),
                                        new Physics,
-                                       ModelManager::Instance().GetModel( "models/sphere.obj", instanceShader,
-                                                                          false ) },
+                                       ModelManager::Instance().GetModel( "models/sphere.obj",
+                                                                          instanceShader,
+                                                                          true ) },
             "Verlet" );
+
+        object->GetComponent< Transform >()->SetOldPosition( { glm::sin( i ) * 7.f * 0.999f,
+                                                               startPosition.y,
+                                                               glm::cos( i ) * 7.f * 0.999f } );
 
         verlet_list.push_back( object );
         for ( int j = 0; j < 3; ++j ) {
@@ -26,15 +43,29 @@ void VerletManager::CreateVerlets( int Amount ) {
     }
 }
 
+void VerletManager::AddVerlet() {
+    VerletManager& instance = VerletManager::Instance();
+
+    if ( instance.curr_count >= instance.max ) {
+        return;
+    }
+
+    instance.curr_count += 1;
+}
+
 void VerletManager::UpdateVerlets() {
 }
 
 void VerletManager::DrawVerlets( glm::mat4& Projection ) {
+    if ( curr_count <= 0 ) {
+        return;
+    }
+
     int positionCounter = 0;
     int velocityCounter = 0;
 
-    for ( Object* verlet : verlet_list ) {
-        Transform* transform = verlet->GetComponent< Transform >();
+    for ( int i = 0; i < curr_count; ++i ) {
+        Transform* transform = verlet_list[i]->GetComponent< Transform >();
 
         glm::vec3 position = transform->GetPosition();
 
@@ -50,12 +81,12 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     Model* model = verlet_list[0]->GetComponent< Model >();
 
     glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->position_VBO );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * 3 * verlet_list.size(),
+    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * 3 * curr_count,
                      positions.data() );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->velocity_VBO );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * verlet_list.size(), velocities.data() );
+    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, velocities.data() );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glUseProgram( model->GetShader() );
@@ -68,7 +99,7 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     glBindVertexArray( model->GetMesh()->VAO );
 
     glDrawArraysInstanced( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices,
-                           static_cast< int >( verlet_list.size() ) );
+                           curr_count );
 
     glUseProgram( 0 );
     glBindVertexArray( 0 );

@@ -8,11 +8,9 @@
 #include "trace.hpp"
 
 Object::Object() : id( -1 ), name( "object" ) {
-    Trace::Instance().Message( "Object created.", FILENAME, LINENUMBER );
 }
 
 Object::Object( std::string Name ) : id( -1 ), name( Name ) {
-    Trace::Instance().Message( "Object created.", FILENAME, LINENUMBER );
 }
 
 Object::Object( const Object& Other ) : id( -1 ), name( Other.name ) {
@@ -37,8 +35,6 @@ void Object::AddComponent( Component* Component ) {
 }
 
 void Object::SetId( int Id ) {
-    Trace::Instance().Message( fmt::format( "Setting object {} with id {}.", name, Id ), FILENAME, LINENUMBER );
-
     id = Id;
 }
 

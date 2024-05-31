@@ -121,7 +121,7 @@ void Graphics::Update() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     glm::mat4 projection = glm::perspective< float >( glm::radians( 45.f ),
-                                                      windowWidth / windowHeight,
+                                                      ( float )windowWidth / ( float )windowHeight,
                                                       0.1f, 100.0f );
 
     // Draw your scene here
