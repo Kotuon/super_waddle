@@ -34,7 +34,6 @@ bool Engine::Initialize() {
     ObjectManager::Instance().CreateObject(
         std::vector< Component* >{ new Transform( glm::vec3( 0.f ), glm::vec3( 6 * 1.02f ),
                                                   glm::vec3( 0.f ) ),
-                                   new Physics,
                                    ModelManager::Instance().GetModel( "models/sphere.obj",
                                                                       GL_POINTS,
                                                                       baseShader,
@@ -70,6 +69,8 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
+            ObjectManager::Instance().FixedUpdate();
+
             accumulator -= fixed_time_step;
             time += fixed_time_step;
         }
@@ -96,6 +97,10 @@ float Engine::GetDeltaTime() const {
 
 float Engine::GetTotalTime() const {
     return time;
+}
+
+float Engine::GetFixedTimeStep() const {
+    return fixed_time_step;
 }
 
 Engine& Engine::Instance() {

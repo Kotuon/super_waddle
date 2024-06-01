@@ -9,6 +9,7 @@
 #include "shader_manager.hpp"
 #include "trace.hpp"
 #include "input.hpp"
+#include "engine.hpp"
 
 void VerletManager::CreateVerlets() {
     Input::Instance().AddCallback( GLFW_KEY_V, &AddVerlet );
@@ -16,10 +17,12 @@ void VerletManager::CreateVerlets() {
     unsigned instanceShader = ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                                                    "shaders/instance_fragment.glsl" );
 
-    for ( int i = 0; i < max; ++i ) {
-        glm::vec3 startPosition{ glm::sin( i ) * 7.f,
+    float distance = 4.f;
+
+    for ( unsigned i = 0; i < max; ++i ) {
+        glm::vec3 startPosition{ glm::sin( i ) * distance,
                                  rand() % ( 2 ) + 1,
-                                 glm::cos( i ) * 7.f };
+                                 glm::cos( i ) * distance };
 
         Object* object = ObjectManager::Instance().CreateObject(
             std::vector< Component* >{ new Transform( startPosition,
@@ -29,11 +32,11 @@ void VerletManager::CreateVerlets() {
                                        ModelManager::Instance().GetModel( "models/sphere.obj",
                                                                           instanceShader,
                                                                           true ) },
-            "Verlet" );
+            "Verlet", false );
 
-        object->GetComponent< Transform >()->SetOldPosition( { glm::sin( i ) * 7.f * 0.999f,
+        object->GetComponent< Transform >()->SetOldPosition( { glm::sin( i ) * distance * 0.999f,
                                                                startPosition.y,
-                                                               glm::cos( i ) * 7.f * 0.999f } );
+                                                               glm::cos( i ) * distance * 0.999f } );
 
         verlet_list.push_back( object );
         for ( int j = 0; j < 3; ++j ) {
@@ -46,11 +49,18 @@ void VerletManager::CreateVerlets() {
 void VerletManager::AddVerlet() {
     VerletManager& instance = VerletManager::Instance();
 
+    instance.timer += Engine::Instance().GetDeltaTime();
+    if ( instance.timer < 0.25f ) {
+        return;
+    }
+
     if ( instance.curr_count >= instance.max ) {
         return;
     }
 
     instance.curr_count += 1;
+    instance.verlet_list[instance.curr_count - 1]->SetIsAlive( true );
+    instance.timer = 0.f;
 }
 
 void VerletManager::UpdateVerlets() {
@@ -64,7 +74,7 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     int positionCounter = 0;
     int velocityCounter = 0;
 
-    for ( int i = 0; i < curr_count; ++i ) {
+    for ( unsigned i = 0; i < curr_count; ++i ) {
         Transform* transform = verlet_list[i]->GetComponent< Transform >();
 
         glm::vec3 position = transform->GetPosition();

@@ -32,7 +32,7 @@ void Camera::Update() {
 }
 
 void Camera::Movement( glm::vec3 MovementInput ) {
-    Camera::Instance().position += Camera::Instance().up * MovementInput.y * 50.f *
+    Camera::Instance().position += Camera::Instance().up * MovementInput.y * 30.f *
                                    Engine::Instance().GetDeltaTime();
 
     Camera::Instance().rotation.y += -1.f * MovementInput.y * 75.f * Engine::Instance().GetDeltaTime();

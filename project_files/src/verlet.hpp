@@ -28,7 +28,8 @@ private:
     std::vector< float > positions;
     std::vector< float > velocities;
 
-    const int max = 100;
+    float timer = 1.f;
+    const unsigned max = 100;
     unsigned curr_count = 0;
 };
 

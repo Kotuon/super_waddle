@@ -15,8 +15,8 @@
 class Object {
 public:
     Object();
-    Object( std::string Name );
-    Object( const Object& other );
+    Object( std::string Name, bool IsAlive = true );
+    Object( const Object& other, bool IsAlive = true );
 
     void Clear();
 
@@ -27,6 +27,9 @@ public:
 
     void SetName( std::string Name );
     std::string GetName() const;
+
+    void SetIsAlive( bool IsAlive );
+    bool GetIsAlive() const;
 
     void Update();
 
@@ -71,14 +74,17 @@ private:
     std::unordered_map< CType, Component* > components;
     std::string name;
     int id;
+    bool is_alive = true;
 };
 
 class ObjectManager {
 public:
-    Object* CreateObject( std::string Name );
-    Object* CreateObject( std::vector< Component* > Components, std::string Name );
+    Object* CreateObject( std::string Name, bool IsAlive = true );
+    Object* CreateObject( std::vector< Component* > Components, std::string Name, bool IsAlive = true );
 
     std::vector< std::unique_ptr< Object > >& GetObjectList();
+
+    void FixedUpdate();
 
     void DestoryObject( Object* ToDestory );
 

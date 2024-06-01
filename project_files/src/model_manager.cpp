@@ -71,29 +71,18 @@ ModelManager::ModelManager() {
 }
 
 Model* ModelManager::GetModel( const std::string& ModelFileName, unsigned Shader, bool Instanced ) {
-    auto it = model_list.find( ModelFileName );
-    if ( it != model_list.end() ) {
-        return &it->second;
-    }
-
     Mesh* mesh = GetMesh( ModelFileName, Instanced );
-    auto modelIter = model_list.insert( { mesh->model_file_name, { mesh, Shader } } );
+    Model* model = new Model( mesh, Shader );
 
-    return &( modelIter.first )->second;
+    return model;
 }
 
 Model* ModelManager::GetModel( const std::string& ModelFileName, unsigned RenderMethod,
                                unsigned Shader, bool Instanced ) {
-    auto it = model_list.find( ModelFileName );
-    if ( it != model_list.end() ) {
-        return &it->second;
-    }
-
     Mesh* mesh = GetMesh( ModelFileName, Instanced );
-    auto modelIter = model_list.insert( { mesh->model_file_name,
-                                          { mesh, RenderMethod, Shader } } );
+    Model* model = new Model( mesh, RenderMethod, Shader );
 
-    return &( modelIter.first )->second;
+    return model;
 }
 
 std::vector< float >* ModelManager::LoadObj( const std::string& ModelFileName ) {
@@ -165,18 +154,12 @@ std::vector< float >* ModelManager::LoadObj( const std::string& ModelFileName ) 
 }
 
 Mesh* ModelManager::GetMesh( const std::string& ModelFileName, bool Instanced ) {
-    auto it = mesh_list.find( ModelFileName );
-    if ( it != mesh_list.end() ) {
-        return &it->second;
-    }
-
     std::vector< float >* vertices = LoadObj( ModelFileName );
     if ( !vertices ) {
         return nullptr;
     }
 
-    auto meshIter = mesh_list.insert( { ModelFileName, ModelFileName } );
-    Mesh* mesh = &( meshIter.first )->second;
+    Mesh* mesh = new Mesh( ModelFileName );
 
     mesh->instanced = Instanced;
     mesh->num_vertices = static_cast< int >( vertices->size() / STRIDE );

@@ -7,13 +7,15 @@
 #include "model_manager.hpp"
 #include "trace.hpp"
 
-Object::Object() : id( -1 ), name( "object" ) {
+Object::Object() : id( -1 ), name( "object" ), is_alive( true ) {
 }
 
-Object::Object( std::string Name ) : id( -1 ), name( Name ) {
+Object::Object( std::string Name, bool IsAlive )
+    : id( -1 ), name( Name ), is_alive( IsAlive ) {
 }
 
-Object::Object( const Object& Other ) : id( -1 ), name( Other.name ) {
+Object::Object( const Object& Other, bool IsAlive )
+    : id( -1 ), name( Other.name ), is_alive( IsAlive ) {
     Transform* transform = Other.GetComponentConst< Transform >();
     if ( transform ) {
         AddComponent( new Transform( *transform ) );
@@ -50,6 +52,14 @@ std::string Object::GetName() const {
     return name;
 }
 
+void Object::SetIsAlive( bool IsAlive ) {
+    is_alive = IsAlive;
+}
+
+bool Object::GetIsAlive() const {
+    return is_alive;
+}
+
 void Object::Update() {
     // TODO: Update components
 }
@@ -66,16 +76,17 @@ bool Object::HasComponent( CType Type ) {
 ObjectManager::ObjectManager() {
 }
 
-Object* ObjectManager::CreateObject( std::string Name ) {
-    object_list.push_back( std::make_unique< Object >( Name ) );
+Object* ObjectManager::CreateObject( std::string Name, bool IsAlive ) {
+    object_list.push_back( std::make_unique< Object >( Name, IsAlive ) );
     Object* newObject = object_list.back().get();
     newObject->SetId( static_cast< int >( object_list.size() - 1 ) );
 
     return newObject;
 }
 
-Object* ObjectManager::CreateObject( std::vector< Component* > Components, std::string Name ) {
-    Object* newObject = CreateObject( Name );
+Object* ObjectManager::CreateObject( std::vector< Component* > Components,
+                                     std::string Name, bool IsAlive ) {
+    Object* newObject = CreateObject( Name, IsAlive );
 
     for ( Component* component : Components ) {
         if ( !newObject->HasComponent( component->GetCType() ) ) {
@@ -91,6 +102,19 @@ Object* ObjectManager::CreateObject( std::vector< Component* > Components, std::
 
 std::vector< std::unique_ptr< Object > >& ObjectManager::GetObjectList() {
     return object_list;
+}
+
+void ObjectManager::FixedUpdate() {
+    for ( auto& obj : object_list ) {
+        if ( !obj->GetIsAlive() ) {
+            continue;
+        }
+
+        Physics* physics = obj->GetComponent< Physics >();
+        if ( physics ) {
+            physics->Update();
+        }
+    }
 }
 
 void ObjectManager::Print() const {

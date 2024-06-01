@@ -16,6 +16,8 @@ public:
     float GetDeltaTime() const;
     float GetTotalTime() const;
 
+    float GetFixedTimeStep() const;
+
     void TriggerShutdown();
 
     static Engine& Instance();

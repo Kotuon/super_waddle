@@ -1,6 +1,9 @@
 
 // Local includes
 #include "component.hpp"
+#include "object_manager.hpp"
+#include "trace.hpp"
+#include "engine.hpp"
 
 Component::Component( CType Type ) : type( Type ) {}
 
@@ -77,6 +80,19 @@ Physics::Physics( const Physics& Other ) : Component( CType::CPhysics ) {
 
 void Physics::Update() {
     acceleration += GRAVITY;
+
+    if ( !GetParent() ) {
+        return;
+    }
+
+    Transform* transform = GetParent()->GetComponent< Transform >();
+    glm::vec3 disp = transform->GetPosition() - transform->GetOldPosition();
+    transform->SetOldPosition( transform->GetPosition() );
+    acceleration *= Engine::Instance().GetFixedTimeStep() * Engine::Instance().GetFixedTimeStep();
+    transform->SetPosition( transform->GetPosition() + disp );
+    transform->SetPosition( transform->GetPosition() + acceleration );
+
+    acceleration = glm::vec3( 0.f );
 }
 
 void Physics::SetAcceleration( glm::vec3 Acceleration ) {

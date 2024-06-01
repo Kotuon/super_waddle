@@ -77,8 +77,6 @@ private:
                      std::array< glm::vec3, VERTEX_LIMIT >& vn );
 
     std::unordered_map< std::string, std::vector< float > > vertices_list;
-    std::unordered_map< std::string, Mesh > mesh_list;
-    std::unordered_map< std::string, Model > model_list;
 };
 
 #endif

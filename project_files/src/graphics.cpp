@@ -120,9 +120,10 @@ void Graphics::Update() {
     // Clear colour and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
-    glm::mat4 projection = glm::perspective< float >( glm::radians( 45.f ),
-                                                      ( float )windowWidth / ( float )windowHeight,
-                                                      0.1f, 100.0f );
+    glm::mat4 projection = glm::perspective< float >(
+        glm::radians( 45.f ),
+        static_cast< float >( windowWidth ) / static_cast< float >( windowHeight ),
+        0.1f, 100.0f );
 
     // Draw your scene here
     std::vector< std::unique_ptr< Object > >& objectList = ObjectManager::Instance().GetObjectList();
@@ -141,7 +142,7 @@ void Graphics::Update() {
 
 void Graphics::DrawNormal( Object* ObjectToDraw, glm::mat4& Projection ) {
     Model* model = ObjectToDraw->GetComponent< Model >();
-    if ( !model || model->GetMesh()->instanced ) {
+    if ( !model || model->GetMesh()->instanced || !ObjectToDraw->GetIsAlive() ) {
         return;
     }
 
