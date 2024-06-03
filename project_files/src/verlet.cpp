@@ -20,6 +20,7 @@ void VerletManager::CreateVerlets() {
     model = ModelManager::Instance().GetModel( "models/sphere.obj", instance_shader, true );
 
     float distance = 4.f;
+    dt = Engine::Instance().GetFixedTimeStep();
 
     for ( unsigned i = 0; i < max; ++i ) {
         verlet_list[i] = std::make_unique< Verlet >();
@@ -30,7 +31,7 @@ void VerletManager::CreateVerlets() {
         verlet_list[i]->old_position = { glm::sin( i ) * distance * 0.999f,
                                          verlet_list[i]->position.y,
                                          glm::cos( i ) * distance * 0.999f };
-        verlet_list[i]->acceleration = glm::vec3( 0.f );
+        verlet_list[i]->acceleration = { 0.f, GRAVITY, 0.f };
         verlet_list[i]->radius = 0.15f;
     }
 }
@@ -39,7 +40,7 @@ void VerletManager::AddVerlet() {
     VerletManager& instance = VerletManager::Instance();
 
     instance.timer += Engine::Instance().GetDeltaTime();
-    if ( instance.timer < 0.25f ) {
+    if ( instance.timer < 0.1f ) {
         return;
     }
 
@@ -92,11 +93,8 @@ void VerletManager::PhysicsUpdate() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
         Verlet* a = verlet_list[i].get();
 
-        float dt = Engine::Instance().GetFixedTimeStep();
-        a->acceleration.y = GRAVITY;
-
         glm::vec3 temp = a->position;
-        a->position += temp - a->old_position + a->acceleration * dt * dt;
+        a->position += a->position - a->old_position + a->acceleration * dt * dt;
         a->old_position = temp;
     }
 }

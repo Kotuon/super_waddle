@@ -52,6 +52,8 @@ private:
 
     unsigned amount_to_add = 10;
 
+    float dt;
+
     float timer = 0.25f;
     unsigned curr_count = 0;
 };
