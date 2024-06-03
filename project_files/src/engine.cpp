@@ -1,4 +1,7 @@
 
+// System headers
+#include <fmt/core.h>
+
 // Local headers
 #include "engine.hpp"
 #include "graphics.hpp"
@@ -10,8 +13,6 @@
 #include "object_manager.hpp"
 #include "component.hpp"
 #include "verlet.hpp"
-
-static char title[100] = "";
 
 Engine::Engine() {
 }
@@ -65,9 +66,10 @@ void Engine::Update() {
         last_time = curr_time;
         accumulator += delta_time;
 
-        sprintf( title, "FPS : %-4.0f | Balls : %-10d", 1.0 / delta_time,
-                 VerletManager::Instance().GetCurrCount() );
-        glfwSetWindowTitle( Graphics::Instance().GetWindow(), title );
+        glfwSetWindowTitle( Graphics::Instance().GetWindow(),
+                            fmt::format( "FPS : {:0.2f} | Balls : {:10}", 1.0f / delta_time,
+                                         VerletManager::Instance().GetCurrCount() )
+                                .c_str() );
 
         // Non-fixed time step update calls
         Input::Instance().Update();
