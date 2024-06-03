@@ -4,7 +4,7 @@
 #pragma once
 
 // std includes
-#include <vector>
+#include <array>
 
 // System includes
 #include <glm/glm.hpp>
@@ -17,19 +17,29 @@ public:
 
     void UpdateVerlets();
 
+    void PhysicsUpdate();
 
     void DrawVerlets( glm::mat4& Projection );
 
     static void AddVerlet();
     static VerletManager& Instance();
 
+    void SetContainer( Object* Container );
+
+    unsigned GetCurrCount() const;
+
 private:
-    std::vector< Object* > verlet_list;
-    std::vector< float > positions;
-    std::vector< float > velocities;
+    static constexpr unsigned max = 200;
+
+    std::array< Object*, max > verlet_list{ nullptr };
+    std::array< float, max * 3 > positions{ 0.f };
+    std::array< float, max > velocities{ 0.f };
+
+    Object* container = nullptr;
+
+    unsigned amount_to_add = 10;
 
     float timer = 1.f;
-    const unsigned max = 100;
     unsigned curr_count = 0;
 };
 

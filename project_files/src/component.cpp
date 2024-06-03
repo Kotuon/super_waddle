@@ -79,13 +79,14 @@ Physics::Physics( const Physics& Other ) : Component( CType::CPhysics ) {
 }
 
 void Physics::Update() {
-    acceleration += GRAVITY;
-
     if ( !GetParent() ) {
         return;
     }
 
+    acceleration.y += GRAVITY;
+
     Transform* transform = GetParent()->GetComponent< Transform >();
+
     glm::vec3 disp = transform->GetPosition() - transform->GetOldPosition();
     transform->SetOldPosition( transform->GetPosition() );
     acceleration *= Engine::Instance().GetFixedTimeStep() * Engine::Instance().GetFixedTimeStep();

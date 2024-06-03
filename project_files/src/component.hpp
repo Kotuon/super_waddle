@@ -56,7 +56,7 @@ private:
     glm::vec3 rotation{ 0.f, 0.f, 0.f };
 };
 
-constexpr float GRAVITY = -15.0f;
+constexpr float GRAVITY = -4.5f;
 
 class Physics : public Component {
 public:

@@ -24,7 +24,7 @@ void VerletManager::CreateVerlets() {
                                  rand() % ( 2 ) + 1,
                                  glm::cos( i ) * distance };
 
-        Object* object = ObjectManager::Instance().CreateObject(
+        verlet_list[i] = ObjectManager::Instance().CreateObject(
             std::vector< Component* >{ new Transform( startPosition,
                                                       glm::vec3( 0.15f ),
                                                       glm::vec3( 0.f ) ),
@@ -34,15 +34,9 @@ void VerletManager::CreateVerlets() {
                                                                           true ) },
             "Verlet", false );
 
-        object->GetComponent< Transform >()->SetOldPosition( { glm::sin( i ) * distance * 0.999f,
-                                                               startPosition.y,
-                                                               glm::cos( i ) * distance * 0.999f } );
-
-        verlet_list.push_back( object );
-        for ( int j = 0; j < 3; ++j ) {
-            positions.push_back( 0.f );
-        }
-        velocities.push_back( 0.f );
+        verlet_list[i]->GetComponent< Transform >()->SetOldPosition( { glm::sin( i ) * distance * 0.999f,
+                                                                       startPosition.y,
+                                                                       glm::cos( i ) * distance * 0.999f } );
     }
 }
 
@@ -58,12 +52,61 @@ void VerletManager::AddVerlet() {
         return;
     }
 
-    instance.curr_count += 1;
-    instance.verlet_list[instance.curr_count - 1]->SetIsAlive( true );
+    for ( unsigned i = instance.curr_count; i < instance.curr_count + instance.amount_to_add; ++i ) {
+        instance.verlet_list[i]->SetIsAlive( true );
+    }
+
+    instance.curr_count += instance.amount_to_add;
     instance.timer = 0.f;
 }
 
 void VerletManager::UpdateVerlets() {
+    if ( curr_count <= 0 ) {
+        return;
+    }
+
+    for ( unsigned i = 0; i < curr_count - 1; ++i ) {
+        for ( unsigned j = i + 1; j < curr_count; ++j ) {
+            Transform* t1 = verlet_list[i]->GetComponent< Transform >();
+            Transform* t2 = verlet_list[j]->GetComponent< Transform >();
+
+            float dist = glm::distance( t1->GetPosition(), t2->GetPosition() );
+            if ( dist < 0.3f ) {
+                glm::vec3 norm = glm::normalize( t1->GetPosition() - t2->GetPosition() );
+                float delta = 0.3f - dist;
+                norm *= 0.5f * delta;
+                t1->SetPosition( t1->GetPosition() + norm );
+                t2->SetPosition( t2->GetPosition() - norm );
+            }
+        }
+    }
+
+    Transform* ct = container->GetComponent< Transform >();
+    float cRadius = 6.f;
+    for ( unsigned i = 0; i < curr_count; i++ ) {
+        Transform* t1 = verlet_list[i]->GetComponent< Transform >();
+        glm::vec3 disp = t1->GetPosition() - ct->GetPosition();
+        float dist = glm::length( disp );
+
+        if ( dist > ( cRadius - 0.15f ) ) {
+            glm::vec3 norm = glm::normalize( disp );
+            norm *= ( cRadius - 0.15f );
+            t1->SetPosition( ct->GetPosition() + norm );
+        }
+    }
+}
+
+void VerletManager::PhysicsUpdate() {
+    for ( unsigned i = 0; i < curr_count; ++i ) {
+        Transform* t = verlet_list[i]->GetComponent< Transform >();
+
+        float dt = Engine::Instance().GetFixedTimeStep();
+
+        glm::vec3 temp = t->GetPosition();
+        t->SetPosition( temp * 2.f - t->GetOldPosition() +
+                        glm::vec3( 0.f, GRAVITY, 0.f ) * dt * dt );
+        t->SetOldPosition( temp );
+    }
 }
 
 void VerletManager::DrawVerlets( glm::mat4& Projection ) {
@@ -84,7 +127,7 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
         positions[positionCounter++] = position.z;
 
         glm::vec3 oldPosition = transform->GetOldPosition();
-        velocities[velocityCounter++] = glm::distance( position, oldPosition );
+        velocities[velocityCounter++] = glm::distance( position, oldPosition ) * 10.f;
     }
 
     Transform* transform = verlet_list[0]->GetComponent< Transform >();
@@ -113,6 +156,14 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
 
     glUseProgram( 0 );
     glBindVertexArray( 0 );
+}
+
+void VerletManager::SetContainer( Object* Container ) {
+    container = Container;
+}
+
+unsigned VerletManager::GetCurrCount() const {
+    return curr_count;
 }
 
 VerletManager& VerletManager::Instance() {

@@ -11,6 +11,8 @@
 #include "component.hpp"
 #include "verlet.hpp"
 
+static char title[100] = "";
+
 Engine::Engine() {
 }
 
@@ -31,7 +33,7 @@ bool Engine::Initialize() {
     unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
                                                                "shaders/base_fragment.glsl" );
 
-    ObjectManager::Instance().CreateObject(
+    Object* container = ObjectManager::Instance().CreateObject(
         std::vector< Component* >{ new Transform( glm::vec3( 0.f ), glm::vec3( 6 * 1.02f ),
                                                   glm::vec3( 0.f ) ),
                                    ModelManager::Instance().GetModel( "models/sphere.obj",
@@ -41,6 +43,7 @@ bool Engine::Initialize() {
         "Container" );
 
     VerletManager::Instance().CreateVerlets();
+    VerletManager::Instance().SetContainer( container );
 
     last_time = steady_clock::now();
     accumulator = 0.f;
@@ -62,6 +65,10 @@ void Engine::Update() {
         last_time = curr_time;
         accumulator += delta_time;
 
+        sprintf( title, "FPS : %-4.0f | Balls : %-10d", 1.0 / delta_time,
+                 VerletManager::Instance().GetCurrCount() );
+        glfwSetWindowTitle( Graphics::Instance().GetWindow(), title );
+
         // Non-fixed time step update calls
         Input::Instance().Update();
 
@@ -69,7 +76,9 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
-            ObjectManager::Instance().FixedUpdate();
+            VerletManager::Instance().UpdateVerlets();
+            VerletManager::Instance().PhysicsUpdate();
+            // ObjectManager::Instance().FixedUpdate();
 
             accumulator -= fixed_time_step;
             time += fixed_time_step;

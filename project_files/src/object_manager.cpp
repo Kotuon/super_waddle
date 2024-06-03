@@ -110,10 +110,10 @@ void ObjectManager::FixedUpdate() {
             continue;
         }
 
-        Physics* physics = obj->GetComponent< Physics >();
-        if ( physics ) {
-            physics->Update();
-        }
+        // Physics* physics = obj->GetComponent< Physics >();
+        // if ( physics ) {
+        //     physics->Update();
+        // }
     }
 }
 
