@@ -78,8 +78,8 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
-            VerletManager::Instance().UpdateVerlets();
-            VerletManager::Instance().PhysicsUpdate();
+            VerletManager::Instance().CollisionUpdate();
+            VerletManager::Instance().PositionUpdate();
             // ObjectManager::Instance().FixedUpdate();
 
             accumulator -= fixed_time_step;

@@ -1,6 +1,7 @@
 
 // System headers
 #include <GLFW/glfw3.h>
+#include <fmt/core.h>
 
 // Local includes
 #include "verlet.hpp"
@@ -22,7 +23,7 @@ void VerletManager::CreateVerlets() {
     float distance = 4.f;
     dt = Engine::Instance().GetFixedTimeStep();
 
-    for ( unsigned i = 0; i < max; ++i ) {
+    for ( unsigned i = 0; i < MAX; ++i ) {
         verlet_list[i] = std::make_unique< Verlet >();
 
         verlet_list[i]->position = { glm::sin( i ) * distance,
@@ -44,7 +45,7 @@ void VerletManager::AddVerlet() {
         return;
     }
 
-    if ( instance.curr_count >= instance.max ) {
+    if ( instance.curr_count >= instance.MAX ) {
         return;
     }
 
@@ -52,23 +53,38 @@ void VerletManager::AddVerlet() {
     instance.timer = 0.f;
 }
 
-void VerletManager::UpdateVerlets() {
+void VerletManager::CollisionUpdate() {
     if ( curr_count <= 0 ) {
         return;
     }
 
-    for ( unsigned i = 0; i < curr_count - 1; ++i ) {
-        for ( unsigned j = i + 1; j < curr_count; ++j ) {
-            Verlet* a = verlet_list[i].get();
-            Verlet* b = verlet_list[j].get();
+    ClearGrid();
+    FillGrid();
 
-            float dist = glm::distance( a->position, b->position );
-            if ( dist < 0.3f ) {
-                glm::vec3 norm = glm::normalize( a->position - b->position );
-                float delta = 0.3f - dist;
-                norm *= 0.5f * delta;
-                a->position += norm;
-                b->position -= norm;
+    for ( unsigned x = 1; x < DIM - 1; ++x ) {
+        for ( unsigned y = 1; y < DIM - 1; ++y ) {
+            for ( unsigned z = 1; z < DIM - 1; ++z ) {
+                // Verlet** currentCell = &collision_grid[x + y * DIM + z * DIM * DIM];
+                Verlet** currentCell = collision_grid[x][y][z].data();
+
+                if ( !currentCell[0] ) {
+                    continue;
+                }
+
+                for ( int dx = -1; dx <= 1; ++dx ) {
+                    for ( int dy = -1; dy <= 1; ++dy ) {
+                        for ( int dz = -1; dz <= 1; ++dz ) {
+                            // Verlet** otherCell = &collision_grid[( x + dx ) + ( y + dy ) * DIM +
+                            //                                      ( z + dz ) * DIM * DIM];
+                            Verlet** otherCell = collision_grid[x + dx][y + dy][z + dz].data();
+
+                            if ( !otherCell[0] ) {
+                                continue;
+                            }
+                            GridCollision( currentCell, otherCell );
+                        }
+                    }
+                }
             }
         }
     }
@@ -81,15 +97,39 @@ void VerletManager::UpdateVerlets() {
         glm::vec3 disp = a->position - ct->GetPosition();
         float dist = glm::length( disp );
 
-        if ( dist > ( cRadius - 0.15f ) ) {
+        if ( dist > ( cRadius - a->radius ) ) {
             glm::vec3 norm = glm::normalize( disp );
-            norm *= ( cRadius - 0.15f );
+            norm *= ( cRadius - a->radius );
             a->position = ct->GetPosition() + norm;
         }
     }
 }
 
-void VerletManager::PhysicsUpdate() {
+void VerletManager::GridCollision( Verlet** CurrentCell, Verlet** OtherCell ) {
+    for ( int a = 0; CurrentCell[a]; ++a ) {
+        for ( int b = 0; OtherCell[b]; ++b ) {
+            Verlet* v1 = CurrentCell[a];
+            Verlet* v2 = OtherCell[b];
+
+            if ( v1 != v2 ) {
+                VerletCollision( v1, v2 );
+            }
+        }
+    }
+}
+
+void VerletManager::VerletCollision( Verlet* a, Verlet* b ) {
+    float dist = glm::distance( a->position, b->position );
+    if ( dist < a->radius + b->radius ) {
+        glm::vec3 norm = glm::normalize( a->position - b->position );
+        float delta = a->radius + b->radius - dist;
+        norm *= 0.5f * delta;
+        a->position += norm;
+        b->position -= norm;
+    }
+}
+
+void VerletManager::PositionUpdate() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
         Verlet* a = verlet_list[i].get();
 
@@ -140,6 +180,43 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
 
     glUseProgram( 0 );
     glBindVertexArray( 0 );
+}
+
+void VerletManager::ClearGrid() {
+    // collision_grid.fill( nullptr );
+    memset( collision_grid.data(), 0, DIM * DIM * DIM * CELL_MAX * ( sizeof( Verlet* ) ) );
+}
+
+void VerletManager::FillGrid() {
+    for ( unsigned i = 0; i < curr_count; ++i ) {
+        Verlet* obj = verlet_list[i].get();
+        int x = static_cast< int >( obj->position.x / ( obj->radius * 2 ) + DIM / 2 );
+        int y = static_cast< int >( obj->position.y / ( obj->radius * 2 ) + DIM / 2 );
+        int z = static_cast< int >( obj->position.z / ( obj->radius * 2 ) + DIM / 2 );
+
+        x = glm::clamp< int >( x, 0, DIM - 1 );
+        y = glm::clamp< int >( y, 0, DIM - 1 );
+        z = glm::clamp< int >( z, 0, DIM - 1 );
+
+        InsertNode( x, y, z, obj );
+    }
+}
+
+void VerletManager::InsertNode( int x, int y, int z, Verlet* obj ) {
+    // Verlet** currentCell = &collision_grid[x + y * DIM + z * DIM * DIM];
+    Verlet** currentCell = collision_grid[x][y][z].data();
+
+    int i = 0;
+    while ( currentCell[i] ) {
+        i += 1;
+    }
+    if ( i >= CELL_MAX ) {
+        Trace::Instance().Message( fmt::format( "x: {}, y: {}, z:{}", obj->position.x, obj->position.y, obj->position.z ), FILENAME, LINENUMBER );
+        Trace::Instance().Message( fmt::format( "x: {}, y: {}, z:{}", x, y, z ), FILENAME, LINENUMBER );
+        Trace::Instance().Message( fmt::format( "Bad index: {}.", i ), FILENAME, LINENUMBER );
+    }
+    // collision_grid[x + y * DIM + z * DIM * DIM + i * DIM * DIM * DIM] = obj;
+    collision_grid[x][y][z][i] = obj;
 }
 
 void VerletManager::SetContainer( Object* Container ) {

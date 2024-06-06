@@ -24,9 +24,9 @@ struct VerletManager {
 public:
     void CreateVerlets();
 
-    void UpdateVerlets();
+    void CollisionUpdate();
 
-    void PhysicsUpdate();
+    void PositionUpdate();
 
     void DrawVerlets( glm::mat4& Projection );
 
@@ -38,11 +38,28 @@ public:
     unsigned GetCurrCount() const;
 
 private:
-    static constexpr unsigned max = 2000;
+    void ClearGrid();
+    void FillGrid();
+    void InsertNode( int x, int y, int z, Verlet* obj );
 
-    std::array< std::unique_ptr< Verlet >, max > verlet_list;
-    std::array< float, max * 3 > positions{ 0.f };
-    std::array< float, max > velocities{ 0.f };
+    void GridCollision( Verlet** CurrentCell, Verlet** OtherCell );
+    void VerletCollision( Verlet* a, Verlet* b );
+
+    static constexpr unsigned MAX = 2000;
+    static constexpr int DIM = static_cast< int >( ( 6 * 1.02f ) / 0.15f ) + 5; // 58;
+    static constexpr int CELL_MAX = 32;
+
+    std::array< std::unique_ptr< Verlet >, MAX > verlet_list;
+    std::array< float, MAX * 3 > positions{ 0.f };
+    std::array< float, MAX > velocities{ 0.f };
+
+    // std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
+    std::array< std::array< std::array< std::array< Verlet*,
+                                                    CELL_MAX >,
+                                        DIM >,
+                            DIM >,
+                DIM >
+        collision_grid{ nullptr };
 
     Object* container = nullptr;
 
