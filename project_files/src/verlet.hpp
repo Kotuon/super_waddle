@@ -31,6 +31,8 @@ public:
     void DrawVerlets( glm::mat4& Projection );
 
     static void AddVerlet();
+    static void ApplyForce();
+    
     static VerletManager& Instance();
 
     void SetContainer( Object* Container );
@@ -47,25 +49,17 @@ private:
 
     static constexpr unsigned MAX = 2000;
     static constexpr int DIM = static_cast< int >( ( 6 * 1.02f ) / 0.15f ) + 5; // 58;
-    static constexpr int CELL_MAX = 32;
+    static constexpr int CELL_MAX = 4;
 
     std::array< std::unique_ptr< Verlet >, MAX > verlet_list;
     std::array< float, MAX * 3 > positions{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
 
-    // std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
-    std::array< std::array< std::array< std::array< Verlet*,
-                                                    CELL_MAX >,
-                                        DIM >,
-                            DIM >,
-                DIM >
-        collision_grid{ nullptr };
+    std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
 
     Object* container = nullptr;
 
     Model* model;
-
-    unsigned instance_shader;
 
     unsigned amount_to_add = 10;
 
