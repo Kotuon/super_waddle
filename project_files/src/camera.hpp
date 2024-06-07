@@ -34,6 +34,9 @@ private:
 
     glm::vec3 rotation;
 
+    float universal_yaw_angle;
+    float universal_pitch_angle;
+
     float orbit_radius = 24.f;
 
     float speed = 1.f;

@@ -15,6 +15,7 @@
 void VerletManager::CreateVerlets() {
     Input::Instance().AddCallback( GLFW_KEY_V, &AddVerlet );
     Input::Instance().AddCallback( GLFW_KEY_G, &ApplyForce );
+    Input::Instance().AddCallback( GLFW_KEY_H, &ToggleForce );
 
     unsigned instance_shader = ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                                                     "shaders/instance_fragment.glsl" );
@@ -41,8 +42,7 @@ void VerletManager::CreateVerlets() {
 void VerletManager::AddVerlet() {
     VerletManager& instance = VerletManager::Instance();
 
-    instance.timer += Engine::Instance().GetDeltaTime();
-    if ( instance.timer < 0.1f ) {
+    if ( instance.add_timer < 0.1f ) {
         return;
     }
 
@@ -51,12 +51,16 @@ void VerletManager::AddVerlet() {
     }
 
     instance.curr_count += instance.amount_to_add;
-    instance.timer = 0.f;
+    instance.add_timer = 0.f;
 }
 
 void VerletManager::ApplyForce() {
     VerletManager& instance = VerletManager::Instance();
-    for ( int i = 0; i < instance.curr_count; ++i ) {
+    if ( instance.force_toggle ) {
+        return;
+    }
+
+    for ( unsigned i = 0; i < instance.curr_count; ++i ) {
         Verlet* v = instance.verlet_list[i].get();
 
         glm::vec3 disp = v->position - glm::vec3( 0.f, 3.f, 0.f );
@@ -68,6 +72,24 @@ void VerletManager::ApplyForce() {
             v->acceleration += norm;
         }
     }
+}
+
+void VerletManager::ToggleForce() {
+    VerletManager& instance = VerletManager::Instance();
+    if ( instance.toggle_timer < 0.5f ) {
+        return;
+    }
+
+    instance.force_toggle = !instance.force_toggle;
+    instance.toggle_timer = 0.f;
+}
+
+void VerletManager::Update() {
+    add_timer += Engine::Instance().GetDeltaTime();
+    toggle_timer += Engine::Instance().GetDeltaTime();
+
+    CollisionUpdate();
+    PositionUpdate();
 }
 
 void VerletManager::CollisionUpdate() {
@@ -149,6 +171,17 @@ void VerletManager::VerletCollision( Verlet* a, Verlet* b ) {
 void VerletManager::PositionUpdate() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
         Verlet* a = verlet_list[i].get();
+
+        if ( force_toggle ) {
+            glm::vec3 disp = a->position - glm::vec3( 0.f, 3.f, 0.f );
+            float dist = glm::length( disp );
+
+            if ( dist > 0 ) {
+                glm::vec3 norm = glm::normalize( disp );
+                norm *= -30.f;
+                a->acceleration += norm;
+            }
+        }
 
         a->acceleration += glm::vec3( 0.f, GRAVITY, 0.f );
 

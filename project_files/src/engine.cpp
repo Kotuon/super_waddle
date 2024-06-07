@@ -23,7 +23,7 @@ bool Engine::Initialize() {
         return false;
     }
 
-    if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 0.f, 24.f ) ) ) {
+    if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 5.f, 20.f ) ) ) {
         Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
@@ -78,8 +78,7 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
-            VerletManager::Instance().CollisionUpdate();
-            VerletManager::Instance().PositionUpdate();
+            VerletManager::Instance().Update();
             // ObjectManager::Instance().FixedUpdate();
 
             accumulator -= fixed_time_step;

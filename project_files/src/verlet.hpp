@@ -24,14 +24,15 @@ struct VerletManager {
 public:
     void CreateVerlets();
 
+    void Update();
     void CollisionUpdate();
-
     void PositionUpdate();
 
     void DrawVerlets( glm::mat4& Projection );
 
     static void AddVerlet();
     static void ApplyForce();
+    static void ToggleForce();
     
     static VerletManager& Instance();
 
@@ -65,8 +66,11 @@ private:
 
     float dt;
 
-    float timer = 0.25f;
+    float add_timer = 0.25f;
+    float toggle_timer = 0.25f;
     unsigned curr_count = 0;
+
+    bool force_toggle = false;
 };
 
 #endif
