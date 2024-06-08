@@ -17,3 +17,6 @@
 [submodule "project_files/vendor/fmt"]
 	path = project_files/vendor/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "project_files/vendor/eigen"]
+	path = project_files/vendor/eigen
+	url = https://gitlab.com/libeigen/eigen

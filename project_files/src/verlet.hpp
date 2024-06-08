@@ -6,6 +6,7 @@
 // std includes
 #include <array>
 #include <memory>
+#include <thread>
 
 // System includes
 #include <glm/glm.hpp>
@@ -14,7 +15,7 @@ struct Verlet {
     glm::vec3 position;
     glm::vec3 old_position;
     glm::vec3 acceleration;
-    float radius;
+    static constexpr float radius = 0.15f;
 };
 
 class Model;
@@ -33,7 +34,7 @@ public:
     static void AddVerlet();
     static void ApplyForce();
     static void ToggleForce();
-    
+
     static VerletManager& Instance();
 
     void SetContainer( Object* Container );
@@ -45,24 +46,29 @@ private:
     void FillGrid();
     void InsertNode( int x, int y, int z, Verlet* obj );
 
-    void GridCollision( Verlet** CurrentCell, Verlet** OtherCell );
-    void VerletCollision( Verlet* a, Verlet* b );
+    void GridCollision();
+    void GridCollisionThread( int ThreadId );
+    void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell );
 
-    static constexpr unsigned MAX = 2000;
-    static constexpr int DIM = static_cast< int >( ( 6 * 1.02f ) / 0.15f ) + 5; // 58;
+    void ContainerCollision();
+
+    static constexpr unsigned MAX = 8000;
+    static constexpr int DIM = 58; // static_cast< int >( ( 6 * 1.02f ) / 0.15f ) + 5; // 58;
     static constexpr int CELL_MAX = 4;
+    static constexpr unsigned THREAD_COUNT = 24;
 
     std::array< std::unique_ptr< Verlet >, MAX > verlet_list;
     std::array< float, MAX * 3 > positions{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
 
     std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
+    std::array< std::thread, THREAD_COUNT > threads;
 
     Object* container = nullptr;
 
     Model* model;
 
-    unsigned amount_to_add = 10;
+    unsigned amount_to_add = 100;
 
     float dt;
 
