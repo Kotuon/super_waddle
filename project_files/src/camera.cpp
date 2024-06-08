@@ -12,7 +12,7 @@ Camera::Camera() {
 
 bool Camera::Initialize( glm::vec3 Position ) {
     position = Position;
-    rotation = { -90.f, 0.f, 0.f };
+    rotation = { -90.f, -12.f, 0.f };
     orbit_radius = Position.z;
 
     Input::Instance().AddWASDCallback( Movement );
@@ -23,21 +23,30 @@ bool Camera::Initialize( glm::vec3 Position ) {
 }
 
 void Camera::Update() {
-    float universalAngle = Engine::Instance().GetTotalTime() * 10.f;
-    position = { glm::cos( glm::radians( universalAngle ) ) * orbit_radius,
+    // universal_yaw_angle = Engine::Instance().GetTotalTime() * 10.f;
+    // position = { glm::cos( glm::radians( universal_yaw_angle ) ) * orbit_radius,
+    //              position.y,
+    //              glm::sin( glm::radians( universal_yaw_angle ) ) * orbit_radius };
+    position = { glm::cos( glm::radians( universal_yaw_angle ) ) * orbit_radius,
                  position.y,
-                 glm::sin( glm::radians( universalAngle ) ) * orbit_radius };
+                 glm::sin( glm::radians( universal_yaw_angle ) ) * orbit_radius };
 
-    rotation.x = universalAngle + 180.f;
+    rotation.x = universal_yaw_angle + 180.f;
+    // rotation.y = universal_pitch_angle;
 }
 
 void Camera::Movement( glm::vec3 MovementInput ) {
-    Camera::Instance().position += Camera::Instance().up * MovementInput.y * 30.f *
+    // Camera::Instance().universal_pitch_angle -= MovementInput.y * 0.25f;
+
+    Camera::Instance().rotation.y += -1.f * MovementInput.y * 75.f *
+                                     Engine::Instance().GetDeltaTime();
+    Camera::Instance().position += GLOBAL_UP * MovementInput.y * 30.f *
                                    Engine::Instance().GetDeltaTime();
 
-    Camera::Instance().rotation.y += -1.f * MovementInput.y * 75.f * Engine::Instance().GetDeltaTime();
-    Camera::Instance().SetOrbitRadius( Camera::Instance().GetOrbitRadius() +
-                                       ( -1.f * MovementInput.y * 2.f * Engine::Instance().GetDeltaTime() ) );
+    // Camera::Instance().SetOrbitRadius( Camera::Instance().GetOrbitRadius() +
+    //                                    ( -1.f * MovementInput.y * 2.f * Engine::Instance().GetDeltaTime() ) );
+
+    Camera::Instance().universal_yaw_angle += MovementInput.x * -1.f * 0.25f;
 }
 
 void Camera::UpdateVectors() {

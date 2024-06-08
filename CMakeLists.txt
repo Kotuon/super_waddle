@@ -42,14 +42,15 @@ include_directories(project_files/src/
     project_files/vendor/glfw/include/
     project_files/vendor/glm/
     project_files/vendor/stb/
-    project_files/vendor/fmt/include)
+    project_files/vendor/fmt/include
+    project_files/vendor/eigen)
 
 #
 # Add files
 #
 file(GLOB VENDORS_SOURCES project_files/vendor/glad/src/glad.c)
 file(GLOB_RECURSE PROJECT_HEADERS project_files/src/*.hpp
-    project_files/src/*.h)
+    project_files/src/*.h project_files/vendor/eigenlib/*.h)
 file(GLOB_RECURSE PROJECT_SOURCES project_files/src/*.cpp
     project_files/src/*.cxx
     project_files/src/*.cc

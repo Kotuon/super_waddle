@@ -1,4 +1,7 @@
 
+// System headers
+#include <fmt/core.h>
+
 // Local headers
 #include "engine.hpp"
 #include "graphics.hpp"
@@ -11,8 +14,6 @@
 #include "component.hpp"
 #include "verlet.hpp"
 
-static char title[100] = "";
-
 Engine::Engine() {
 }
 
@@ -22,7 +23,7 @@ bool Engine::Initialize() {
         return false;
     }
 
-    if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 0.f, 24.f ) ) ) {
+    if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 5.f, 20.f ) ) ) {
         Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
@@ -65,9 +66,10 @@ void Engine::Update() {
         last_time = curr_time;
         accumulator += delta_time;
 
-        sprintf( title, "FPS : %-4.0f | Balls : %-10d", 1.0 / delta_time,
-                 VerletManager::Instance().GetCurrCount() );
-        glfwSetWindowTitle( Graphics::Instance().GetWindow(), title );
+        glfwSetWindowTitle( Graphics::Instance().GetWindow(),
+                            fmt::format( "FPS : {:0.2f} | Balls : {:10}", 1.0f / delta_time,
+                                         VerletManager::Instance().GetCurrCount() )
+                                .c_str() );
 
         // Non-fixed time step update calls
         Input::Instance().Update();
@@ -76,8 +78,7 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
-            VerletManager::Instance().UpdateVerlets();
-            VerletManager::Instance().PhysicsUpdate();
+            VerletManager::Instance().Update();
             // ObjectManager::Instance().FixedUpdate();
 
             accumulator -= fixed_time_step;
