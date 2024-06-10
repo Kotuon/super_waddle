@@ -33,6 +33,8 @@ private:
     void DrawInstaned( Object* ObjectToDraw, glm::mat4& Projection );
 
     GLFWwindow* window;
+
+    glm::mat4 projection;
 };
 
 // Function for handling keypresses

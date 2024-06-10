@@ -105,6 +105,11 @@ bool Graphics::Initialize() {
     glfwSetCursorEnterCallback( window, Graphics::CursorEnterCallback );
     glfwSetWindowCloseCallback( window, Input::CloseWindowCallback );
 
+    projection = glm::perspective< float >(
+        glm::radians( 45.f ),
+        static_cast< float >( windowWidth ) / static_cast< float >( windowHeight ),
+        0.1f, 100.0f );
+
     return true;
 }
 
@@ -119,11 +124,6 @@ void Graphics::Update() {
 
     // Clear colour and depth buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-
-    glm::mat4 projection = glm::perspective< float >(
-        glm::radians( 45.f ),
-        static_cast< float >( windowWidth ) / static_cast< float >( windowHeight ),
-        0.1f, 100.0f );
 
     // Draw your scene here
     std::vector< std::unique_ptr< Object > >& objectList = ObjectManager::Instance().GetObjectList();

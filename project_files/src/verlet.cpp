@@ -56,17 +56,20 @@ void VerletManager::CreateVerlets() {
                                          verlet_list[i]->position.y,
                                          glm::cos( i ) * distance * 0.999f };
         verlet_list[i]->acceleration = { 0.f, GRAVITY, 0.f };
+
+        // verlet_list[i]->radius = 0.05f + static_cast< float >( rand() ) / ( static_cast< float >( RAND_MAX / ( 0.20f - 0.05f ) ) );
+        scales[i] = verlet_list[i]->radius;
     }
 }
 
 void VerletManager::AddVerlet() {
     VerletManager& instance = VerletManager::Instance();
 
-    if ( instance.add_timer < 0.1f ) {
+    if ( instance.add_timer < 0.1f || instance.curr_count >= instance.MAX ) {
         return;
     }
 
-    if ( instance.curr_count >= instance.MAX ) {
+    if ( ( 1.f / Engine::Instance().GetDeltaTime() ) < 60.f ) {
         return;
     }
 
@@ -117,27 +120,17 @@ void VerletManager::CollisionUpdate() {
         return;
     }
 
-    timer.Start();
     ClearGrid();
-    timer.End( "Clear Grid" );
-
-    timer.Start();
     FillGrid();
-    timer.End( "Fill Grid" );
 
-    timer.Start();
     for ( int i = 0; i < THREAD_COUNT; ++i ) {
         threads[i] = std::thread( &VerletManager::GridCollisionThread, this, i );
     }
     for ( std::thread& thd : threads ) {
         thd.join();
     }
-    // GridCollision();
-    timer.End( "Verlet Collision" );
 
-    timer.Start();
     ContainerCollision();
-    timer.End( "Container Collision" );
 }
 
 void VerletManager::GridCollision() {
@@ -260,7 +253,8 @@ void VerletManager::PositionUpdate() {
         a->acceleration += glm::vec3( 0.f, GRAVITY, 0.f );
 
         glm::vec3 temp = a->position;
-        a->position += a->position - a->old_position + a->acceleration * dt * dt;
+        glm::vec3 last_movement = a->position - a->old_position;
+        a->position += last_movement + ( a->acceleration - ( last_movement )*VEL_DAMPING ) * dt * dt;
         a->old_position = temp;
 
         a->acceleration = glm::vec3( 0.f );
@@ -294,12 +288,16 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, velocities.data() );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
+    glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->scale_VBO );
+    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, scales.data() );
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
     glUseProgram( model->GetShader() );
 
     glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
                         1, GL_FALSE, &Projection[0][0] );
 
-    glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ), verlet_list[0]->radius );
+    // glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ), verlet_list[0]->radius );
 
     glBindVertexArray( model->GetMesh()->VAO );
 

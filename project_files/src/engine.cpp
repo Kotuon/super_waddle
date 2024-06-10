@@ -73,6 +73,9 @@ void Engine::Update() {
 
         // Non-fixed time step update calls
         Input::Instance().Update();
+        // if ( ( 1.f / delta_time ) >= 60.f ) {
+        //     VerletManager::AddVerlet();
+        // }
 
         // Fixed time step update calls
         while ( accumulator >= fixed_time_step ) {

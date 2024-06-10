@@ -93,7 +93,8 @@
             "stack": "cpp",
             "typeindex": "cpp",
             "variant": "cpp",
-            "xtree": "cpp"
+            "xtree": "cpp",
+            "unordered_set": "cpp"
         }
     }
 }

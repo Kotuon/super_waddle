@@ -198,6 +198,14 @@ Mesh* ModelManager::GetMesh( const std::string& ModelFileName, bool Instanced ) 
         glEnableVertexAttribArray( 4 );
         glVertexAttribPointer( 4, 1, GL_FLOAT, GL_FALSE, sizeof( float ), ( void* )0 );
         glVertexAttribDivisor( 4, 1 );
+
+        // Scale
+        glGenBuffers( 1, &( mesh->scale_VBO ) );
+        glBindBuffer( GL_ARRAY_BUFFER, mesh->scale_VBO );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( float ) * MAX_INSTANCES, NULL, GL_STREAM_DRAW );
+        glEnableVertexAttribArray( 5 );
+        glVertexAttribPointer( 5, 1, GL_FLOAT, GL_FALSE, sizeof( float ), ( void* )0 );
+        glVertexAttribDivisor( 5, 1 );
     }
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
