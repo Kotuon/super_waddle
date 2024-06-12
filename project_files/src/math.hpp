@@ -52,10 +52,8 @@ inline float* vec_sub( float* result, const float* vec0, const float* vec1 ) {
 }
 
 inline float* vec_mul_f( float* result, const float* vec, const float f ) {
-    float vec_f[3] = { f, f, f };
-
     __m128 v0 = _mm_load_ps( vec );
-    __m128 v1 = _mm_load_ps( vec_f );
+    __m128 v1 = _mm_set_ps( f, f, f, f );
 
     __m128 a0 = _mm_mul_ps( v0, v1 );
 
@@ -65,10 +63,8 @@ inline float* vec_mul_f( float* result, const float* vec, const float f ) {
 }
 
 inline float* vec_divide_f( float* result, const float* vec, const float f ) {
-    float vec_f[3] = { f, f, f };
-
     __m128 v0 = _mm_load_ps( vec );
-    __m128 v1 = _mm_load_ps( vec_f );
+    __m128 v1 = _mm_set_ps( f, f, f, f );
 
     __m128 a0 = _mm_div_ps( v0, v1 );
 

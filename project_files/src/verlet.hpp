@@ -23,7 +23,6 @@ struct Verlet {
 };
 
 class Model;
-class Object;
 
 struct VerletManager {
 public:
@@ -82,7 +81,7 @@ private:
 
     float add_timer = 0.25f;
     float toggle_timer = 0.25f;
-    unsigned curr_count = 0;
+    unsigned curr_count = 10000;
 
     bool force_toggle = false;
 };

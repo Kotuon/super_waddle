@@ -12,6 +12,8 @@
 #include "model_manager.hpp"
 #include "verlet.hpp"
 
+#include "profiler.hpp"
+
 struct Container {
     float pos[3] = { 0.f };
     float radius = 6 * 1.02f;
@@ -60,6 +62,8 @@ bool Engine::Initialize() {
 }
 
 void Engine::Update() {
+    Profiler profiler;
+
     while ( is_running ) {
         curr_time = steady_clock::now();
         time_taken = curr_time - last_time;
@@ -70,8 +74,8 @@ void Engine::Update() {
         accumulator += delta_time;
 
         glfwSetWindowTitle( Graphics::Instance().GetWindow(),
-                            fmt::format( "FPS : {:0.2f} | Balls : {:10}", 1.0f / delta_time,
-                                         VerletManager::Instance().GetCurrCount() )
+                            fmt::format( "FPS : {:0.2f} | Balls : {:10} | Time : {:5}", 1.0f / delta_time,
+                                         VerletManager::Instance().GetCurrCount(), time )
                                 .c_str() );
 
         // Non-fixed time step update calls
