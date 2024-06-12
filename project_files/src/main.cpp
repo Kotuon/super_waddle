@@ -13,8 +13,11 @@
 #include "graphics.hpp"
 #include "engine.hpp"
 #include "trace.hpp"
+#include "crash_handler.hpp"
 
-int main( int, char* [] ) {
+int main( int, char*[] ) {
+    SetupDump();
+
     char dir[256];
     GetModuleFileName( nullptr, dir, 256 );
     Trace::Instance().Message( fmt::format( "{}", dir ), FILENAME, LINENUMBER );

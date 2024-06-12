@@ -10,7 +10,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-class Object;
+class Model;
 
 class Graphics {
 public:
@@ -26,15 +26,20 @@ public:
     static void GLFWErrorCallback( int Error, const char* Description );
     static Graphics& Instance();
 
+    void SetContainer( Model* Model, float Radius );
+
 private:
     Graphics();
 
-    void DrawNormal( Object* ObjectToDraw, glm::mat4& Projection );
-    void DrawInstaned( Object* ObjectToDraw, glm::mat4& Projection );
+    void DrawNormal( glm::mat4& Projection );
 
     GLFWwindow* window;
 
     glm::mat4 projection;
+
+    glm::mat4 c_matrix = glm::mat4( 1.f );
+    Model* c_model;
+    float c_radius;
 };
 
 // Function for handling keypresses

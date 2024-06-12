@@ -11,9 +11,6 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-// Local includes
-#include "component.hpp"
-
 constexpr unsigned VERTEX_LIMIT = 2000;
 constexpr unsigned STRIDE = 8;
 constexpr unsigned INSTANCE_STRIDE = 3;
@@ -33,7 +30,7 @@ struct Mesh {
     bool instanced;
 };
 
-class Model : public Component {
+class Model {
 public:
     Model( Mesh* NewMesh, unsigned Shader );
     Model( Mesh* NewMesh, unsigned RenderMethod, unsigned Shader );
@@ -47,8 +44,6 @@ public:
 
     void SetShader( unsigned NewShader );
     unsigned GetShader() const;
-
-    static CType GetCType();
 
 private:
     Model();

@@ -10,9 +10,16 @@
 #include "camera.hpp"
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
-#include "object_manager.hpp"
-#include "component.hpp"
 #include "verlet.hpp"
+
+struct Container {
+    float pos[3] = { 0.f };
+    float radius = 6 * 1.02f;
+};
+
+Container container;
+Model* base_model;
+unsigned base_shader;
 
 Engine::Engine() {
 }
@@ -31,20 +38,16 @@ bool Engine::Initialize() {
                                          "shaders/phong_fragment.glsl" );
     ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                          "shaders/instance_fragment.glsl" );
-    unsigned baseShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
-                                                               "shaders/base_fragment.glsl" );
+    base_shader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
+                                                       "shaders/base_fragment.glsl" );
 
-    Object* container = ObjectManager::Instance().CreateObject(
-        std::vector< Component* >{ new Transform( glm::vec3( 0.f ), glm::vec3( 6 * 1.02f ),
-                                                  glm::vec3( 0.f ) ),
-                                   ModelManager::Instance().GetModel( "models/sphere.obj",
-                                                                      GL_POINTS,
-                                                                      baseShader,
-                                                                      false ) },
-        "Container" );
+    base_model = ModelManager::Instance().GetModel( "models/sphere.obj", GL_POINTS, base_shader,
+                                                    false );
+
+    Graphics::Instance().SetContainer( base_model, container.radius );
 
     VerletManager::Instance().CreateVerlets();
-    VerletManager::Instance().SetContainer( container );
+    VerletManager::Instance().SetContainerRadius( container.radius );
 
     last_time = steady_clock::now();
     accumulator = 0.f;
@@ -73,16 +76,12 @@ void Engine::Update() {
 
         // Non-fixed time step update calls
         Input::Instance().Update();
-        // if ( ( 1.f / delta_time ) >= 60.f ) {
-        //     VerletManager::AddVerlet();
-        // }
 
         // Fixed time step update calls
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
             VerletManager::Instance().Update();
-            // ObjectManager::Instance().FixedUpdate();
 
             accumulator -= fixed_time_step;
             time += fixed_time_step;

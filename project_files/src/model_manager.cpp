@@ -17,21 +17,18 @@ Mesh::Mesh( std::string ModelFileName ) : model_file_name( ModelFileName ) {
 }
 
 Model::Model()
-    : Component( CType::CModel ),
-      mesh( nullptr ),
+    : mesh( nullptr ),
       render_method( GL_TRIANGLES ) {
 }
 
 Model::Model( Mesh* NewMesh, unsigned Shader )
-    : Component( CType::CModel ),
-      mesh( NewMesh ),
+    : mesh( NewMesh ),
       render_method( GL_TRIANGLES ),
       shader( Shader ) {
 }
 
 Model::Model( Mesh* NewMesh, unsigned RenderMethod, unsigned Shader )
-    : Component( CType::CModel ),
-      mesh( NewMesh ),
+    : mesh( NewMesh ),
       render_method( RenderMethod ),
       shader( Shader ) {
 }
@@ -61,10 +58,6 @@ void Model::SetShader( unsigned NewShader ) {
 
 unsigned Model::GetShader() const {
     return shader;
-}
-
-CType Model::GetCType() {
-    return CType::CModel;
 }
 
 ModelManager::ModelManager() {
