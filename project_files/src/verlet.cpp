@@ -5,8 +5,6 @@
 #include <GLFW/glfw3.h>
 #include <fmt/core.h>
 
-#include <Eigen/Dense>
-
 // Local includes
 #include "verlet.hpp"
 #include "model_manager.hpp"
@@ -27,13 +25,15 @@ struct Timer {
     void End( std::string message ) {
         end = std::chrono::high_resolution_clock::now();
         duration = end - start;
-        Trace::Instance().Message( fmt::format( "{}: {}", message, duration.count() ), FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "{}: {}", message, duration.count() ), FILENAME, LINENUMBER );
     }
 };
 
 static Timer timer;
 
-void VerletManager::CreateVerlets() {
+void VerletManager::CreateVerlets( ContainerShape CShape ) {
+    c_shape = CShape;
+
     Input::Instance().AddCallback( GLFW_KEY_V, &AddVerlet );
     Input::Instance().AddCallback( GLFW_KEY_G, &ApplyForce );
     Input::Instance().AddCallback( GLFW_KEY_H, &ToggleForce );
@@ -224,50 +224,81 @@ void VerletManager::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) 
 }
 
 void VerletManager::ContainerCollision() {
-    for ( unsigned i = 0; i < curr_count; i++ ) {
-        Verlet* a = verlet_list[i].get();
 
-        float disp[VEC3]{ a->position[0], a->position[1], a->position[2] };
-        float dist = vec_length( disp );
+    switch ( c_shape ) {
+    case Sphere:
+        for ( unsigned i = 0; i < curr_count; ++i ) {
+            Verlet* v = verlet_list[i].get();
 
-        if ( dist > ( c_radius - a->radius ) ) {
-            float norm[VEC3];
-            vec_divide_f( norm, disp, dist );
-            vec_mul_f( norm, norm, c_radius - a->radius );
-            vec_set( a->position, norm );
+            float disp[VEC3]{ v->position[0], v->position[1], v->position[2] };
+            float dist = vec_length( disp );
+
+            if ( dist > ( c_radius - v->radius ) ) {
+                float norm[VEC3];
+                vec_divide_f( norm, disp, dist );
+                vec_mul_f( norm, norm, c_radius - v->radius );
+                vec_set( v->position, norm );
+            }
         }
+        break;
+
+    case Cube:
+        for ( unsigned i = 0; i < curr_count; ++i ) {
+            Verlet* v = verlet_list[i].get();
+
+            for ( unsigned j = 0; j < 3; ++j ) {
+                if ( v->position[j] < -c_radius ) {
+                    float disp = v->position[j] - v->old_position[j];
+                    v->position[j] = -c_radius;
+                    v->old_position[j] = v->position[j] + disp;
+                }
+                if ( v->position[j] > c_radius ) {
+                    float disp = v->position[j] - v->old_position[j];
+                    v->position[j] = c_radius;
+                    v->old_position[j] = v->position[j] + disp;
+                }
+            }
+        }
+        break;
+
+    default:
+        break;
     }
 }
 
 void VerletManager::PositionUpdate() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
-        Verlet* a = verlet_list[i].get();
+        Verlet* verlet = verlet_list[i].get();
 
         if ( force_toggle ) {
             float disp[VEC3];
-            vec_sub( disp, a->position, force_vec );
+            vec_sub( disp, verlet->position, force_vec );
             float dist = vec_length( disp );
 
             if ( dist > 0 ) {
                 float norm[VEC3];
                 vec_divide_f( norm, disp, dist );
                 vec_mul_f( norm, norm, -30.f );
-                vec_add( a->acceleration, a->acceleration, norm );
+                vec_add( verlet->acceleration, verlet->acceleration, norm );
             }
         }
 
-        vec_add( a->acceleration, a->acceleration, grav_vec );
+        vec_add( verlet->acceleration, verlet->acceleration, grav_vec );
 
-        float temp[VEC3]{ a->position[0], a->position[1], a->position[2] };
+        float temp[VEC3]{ verlet->position[0], verlet->position[1], verlet->position[2] };
         float disp[VEC3];
-        vec_sub( disp, a->position, a->old_position );
-        vec_set( a->old_position, a->position );
+        vec_sub( disp, verlet->position, verlet->old_position );
+        vec_set( verlet->old_position, verlet->position );
 
-        vec_mul_f( a->acceleration, a->acceleration, dt * dt );
-        vec_add( a->position, a->position, disp );
-        vec_add( a->position, a->position, a->acceleration );
+        float forceReduction[VEC3];
+        vec_mul_f( forceReduction, disp, VEL_DAMPING );
+        vec_sub( verlet->acceleration, verlet->acceleration, forceReduction );
 
-        vec_zero( a->acceleration );
+        vec_mul_f( verlet->acceleration, verlet->acceleration, dt * dt );
+        vec_add( verlet->position, verlet->position, disp );
+        vec_add( verlet->position, verlet->position, verlet->acceleration );
+
+        vec_zero( verlet->acceleration );
     }
 }
 
@@ -280,13 +311,15 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     int velocityCounter = 0;
 
     for ( unsigned i = 0; i < curr_count; ++i ) {
-        Verlet* a = verlet_list[i].get();
+        Verlet* verlet = verlet_list[i].get();
 
-        positions[positionCounter++] = a->position[0];
-        positions[positionCounter++] = a->position[1];
-        positions[positionCounter++] = a->position[2];
+        positions[positionCounter++] = verlet->position[0];
+        positions[positionCounter++] = verlet->position[1];
+        positions[positionCounter++] = verlet->position[2];
 
-        velocities[velocityCounter++] = vec_distance( a->position, a->old_position ) * 10.f;
+        velocities[velocityCounter++] = vec_distance( verlet->position,
+                                                      verlet->old_position ) *
+                                        10.f;
     }
 
     glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->position_VBO );
@@ -324,16 +357,16 @@ void VerletManager::ClearGrid() {
 
 void VerletManager::FillGrid() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
-        Verlet* obj = verlet_list[i].get();
-        int x = static_cast< int >( obj->position[0] / ( obj->radius * 2 ) + DIM / 2 );
-        int y = static_cast< int >( obj->position[1] / ( obj->radius * 2 ) + DIM / 2 );
-        int z = static_cast< int >( obj->position[2] / ( obj->radius * 2 ) + DIM / 2 );
+        Verlet* verlet = verlet_list[i].get();
+        int x = static_cast< int >( verlet->position[0] / ( verlet->radius * 2 ) + DIM / 2 );
+        int y = static_cast< int >( verlet->position[1] / ( verlet->radius * 2 ) + DIM / 2 );
+        int z = static_cast< int >( verlet->position[2] / ( verlet->radius * 2 ) + DIM / 2 );
 
         x = glm::clamp< int >( x, 0, DIM - 1 );
         y = glm::clamp< int >( y, 0, DIM - 1 );
         z = glm::clamp< int >( z, 0, DIM - 1 );
 
-        InsertNode( x, y, z, obj );
+        InsertNode( x, y, z, verlet );
     }
 }
 

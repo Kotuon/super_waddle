@@ -24,9 +24,14 @@ struct Verlet {
 
 class Model;
 
+enum ContainerShape {
+    Sphere,
+    Cube,
+};
+
 struct VerletManager {
 public:
-    void CreateVerlets();
+    void CreateVerlets( ContainerShape CShape );
 
     void Update();
     void CollisionUpdate();
@@ -70,10 +75,11 @@ private:
 
     Model* model;
 
-    static constexpr float force_vec[VEC3] = { 0.f, 3.f, 0.f };
+    static constexpr float force_vec[VEC3] = { 0.f, 0.f, 0.f };
     static constexpr float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
+    static constexpr float VEL_DAMPING = 40.f;
 
-    unsigned amount_to_add = 100;
+    unsigned amount_to_add = 10;
 
     float c_radius;
 
@@ -81,7 +87,9 @@ private:
 
     float add_timer = 0.25f;
     float toggle_timer = 0.25f;
-    unsigned curr_count = 10000;
+    unsigned curr_count = 0;
+
+    ContainerShape c_shape;
 
     bool force_toggle = false;
 };

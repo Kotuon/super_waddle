@@ -19,12 +19,18 @@ Trace& Trace::Instance() {
 }
 
 void Trace::Message( std::string message, std::string filename, int linenumber ) {
-    if ( !trace_stream )
+    Trace& instance = Trace::Instance();
+    if ( !instance.trace_stream )
         return;
 
-    std::string output = filename.substr( 0, std::string::npos ) + "( " + std::to_string( linenumber ) + " )" + ": " + message;
+    size_t startPos = filename.find_last_of( '\\' );
+    if ( startPos == std::string::npos ) {
+        startPos = 0;
+    }
+    std::string output = filename.substr( startPos + 1, std::string::npos ) +
+                         "( " + std::to_string( linenumber ) + " )" + ": " + message;
 
-    trace_stream << output << "\n";
+    instance.trace_stream << output << "\n";
     std::cout << output << "\n";
 }
 

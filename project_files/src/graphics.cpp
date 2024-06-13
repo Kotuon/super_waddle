@@ -31,7 +31,7 @@ Graphics::Graphics() {
 
 bool Graphics::Initialize() {
     if ( !glfwInit() ) {
-        Trace::Instance().Message( "Could not start GLFW.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not start GLFW.", FILENAME, LINENUMBER );
         return false;
     }
 
@@ -56,7 +56,7 @@ bool Graphics::Initialize() {
 
     // Ensure the window is set up correctly
     if ( !window ) {
-        Trace::Instance().Message( "Could not open GLFW window.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not open GLFW window.", FILENAME, LINENUMBER );
 
         glfwTerminate();
         return false;
@@ -66,19 +66,19 @@ bool Graphics::Initialize() {
     glfwMakeContextCurrent( window );
     gladLoadGL();
 
-    Trace::Instance().Message( fmt::format( "{}: {}",
-                                            CastToString( glGetString( GL_VENDOR ) ),
-                                            CastToString( glGetString( GL_RENDERER ) ) ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "GLFW\t {}",
-                                            glfwGetVersionString() ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "OpenGL\t {}",
-                                            CastToString( glGetString( GL_VERSION ) ) ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "GLSL\t {}",
-                                            CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ),
-                               FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "{}: {}",
+                                 CastToString( glGetString( GL_VENDOR ) ),
+                                 CastToString( glGetString( GL_RENDERER ) ) ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "GLFW\t {}",
+                                 glfwGetVersionString() ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "OpenGL\t {}",
+                                 CastToString( glGetString( GL_VERSION ) ) ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "GLSL\t {}",
+                                 CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ),
+                    FILENAME, LINENUMBER );
 
     // Enable depth (Z) buffer (accept "closest" fragment)
     glEnable( GL_DEPTH_TEST );
@@ -187,7 +187,7 @@ void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
                           std::string( Description ) +
                           std::to_string( Error );
 
-    Trace::Instance().Message( message, FILENAME, LINENUMBER );
+    Trace::Message( message, FILENAME, LINENUMBER );
 }
 
 Graphics& Graphics::Instance() {

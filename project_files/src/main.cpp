@@ -15,17 +15,12 @@
 #include "trace.hpp"
 #include "crash_handler.hpp"
 
-#include "math.hpp"
-#include <glm/glm.hpp>
-#include <functional>
-#include "benchmark.hpp"
-
 int main( int, char*[] ) {
     SetupDump();
 
     char dir[256];
     GetModuleFileName( nullptr, dir, 256 );
-    Trace::Instance().Message( fmt::format( "{}", dir ), FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "{}", dir ), FILENAME, LINENUMBER );
 
     // Initialize application
     bool result = Engine::Instance().Initialize();

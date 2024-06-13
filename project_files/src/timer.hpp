@@ -19,7 +19,7 @@ struct Timer {
     void End( std::string message ) {
         end = std::chrono::steady_clock::now();
         duration = end - start;
-        Trace::Instance().Message( fmt::format( "{}: {}", message, duration.count() ), FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "{}: {}", message, duration.count() ), FILENAME, LINENUMBER );
     }
 };
 

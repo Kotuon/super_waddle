@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 
 // Local headers
+#include "profiler.hpp"
 #include "engine.hpp"
 #include "graphics.hpp"
 #include "trace.hpp"
@@ -12,51 +13,46 @@
 #include "model_manager.hpp"
 #include "verlet.hpp"
 
-#include "profiler.hpp"
-
-struct Container {
-    float pos[3] = { 0.f };
-    float radius = 6 * 1.02f;
-};
-
-Container container;
-Model* base_model;
-unsigned base_shader;
+static float ContainerRadius = 6.f * 1.02f;
+// static float ContainerRadius = 6.f * 2.f + 0.15f * 3.f;
 
 Engine::Engine() {
 }
 
 bool Engine::Initialize() {
     if ( !Graphics::Instance().Initialize() ) {
-        Trace::Instance().Message( "Graphics falied to initialize.", FILENAME, LINENUMBER );
+        Trace::Message( "Graphics falied to initialize.", FILENAME, LINENUMBER );
         return false;
     }
 
     if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 5.f, 20.f ) ) ) {
-        Trace::Instance().Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
+        Trace::Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
     }
 
     ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
                                          "shaders/phong_fragment.glsl" );
     ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                          "shaders/instance_fragment.glsl" );
-    base_shader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
-                                                       "shaders/base_fragment.glsl" );
+    unsigned base_shader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
+                                                                "shaders/base_fragment.glsl" );
 
-    base_model = ModelManager::Instance().GetModel( "models/sphere.obj", GL_POINTS, base_shader,
-                                                    false );
+    Model* base_model = ModelManager::Instance().GetModel( "models/sphere.obj", GL_POINTS,
+                                                           base_shader, false );
 
-    Graphics::Instance().SetContainer( base_model, container.radius );
+    // Model* base_model = ModelManager::Instance().GetModel( "models/cube.obj", GL_TRIANGLES,
+    //                                                        base_shader, false );
 
-    VerletManager::Instance().CreateVerlets();
-    VerletManager::Instance().SetContainerRadius( container.radius );
+    Graphics::Instance().SetContainer( base_model, ContainerRadius );
+
+    VerletManager::Instance().CreateVerlets( ContainerShape::Sphere );
+    VerletManager::Instance().SetContainerRadius( 6.f );
 
     last_time = steady_clock::now();
     accumulator = 0.f;
     time = 0.f;
     is_running = true;
 
-    Trace::Instance().Message( "Engine initialize successful.", FILENAME, LINENUMBER );
+    Trace::Message( "Engine initialize successful.", FILENAME, LINENUMBER );
 
     return true;
 }
@@ -74,7 +70,8 @@ void Engine::Update() {
         accumulator += delta_time;
 
         glfwSetWindowTitle( Graphics::Instance().GetWindow(),
-                            fmt::format( "FPS : {:0.2f} | Balls : {:10} | Time : {:5}", 1.0f / delta_time,
+                            fmt::format( "FPS : {:0.2f} | Balls : {:10} | Time : {:5.2f}",
+                                         1.0f / delta_time,
                                          VerletManager::Instance().GetCurrCount(), time )
                                 .c_str() );
 
