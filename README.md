@@ -29,4 +29,4 @@ Built for Windows 10 using CMake.
 * Logging system.
 
 ## References
-Primary reference was this [implementation of verlet integration in C.](https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html)
+Primary reference was this [implementation of verlet integration in C.](https://github.com/marichardson137/VerletIntegration/tree/main)
