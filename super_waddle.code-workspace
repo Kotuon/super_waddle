@@ -94,7 +94,8 @@
             "typeindex": "cpp",
             "variant": "cpp",
             "xtree": "cpp",
-            "unordered_set": "cpp"
+            "unordered_set": "cpp",
+            "*.inc": "cpp"
         }
     }
 }

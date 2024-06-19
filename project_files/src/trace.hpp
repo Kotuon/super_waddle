@@ -14,13 +14,6 @@
 class Trace {
 public:
     /**
-     * @brief Get the instance of trace
-     * 
-     * @return Trace& 
-     */
-    static Trace& Instance();
-
-    /**
      * @brief Prints a message into the output file
      *
      * @param message Message to be printed
@@ -28,7 +21,7 @@ public:
      * @param linenumber Should always be LINENUMBER
      * @return void
      */
-    void Message( std::string message, std::string filename, int linenumber );
+    static void Message( std::string message, std::string filename, int linenumber );
 
     /**
      * @brief Destroy the Trace:: Trace object
@@ -42,6 +35,13 @@ private:
      *
      */
     Trace();
+
+    /**
+     * @brief Get the instance of trace
+     *
+     * @return Trace&
+     */
+    static Trace& Instance();
 
 private:
     std::fstream trace_stream; //!< Output file

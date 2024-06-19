@@ -34,8 +34,8 @@ unsigned ShaderManager::GetShader( const std::string& VertexFile, const std::str
         GLchar* infoLog = new GLchar[logSize];
         glGetShaderInfoLog( vertexShader, logSize, &logSize, infoLog );
         glDeleteShader( vertexShader );
-        Trace::Instance().Message( fmt::format( "Vertex Shader {}: {}\n", VertexFile, infoLog ),
-                                   FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "Vertex Shader {}: {}\n", VertexFile, infoLog ),
+                        FILENAME, LINENUMBER );
         delete[] infoLog;
     }
 
@@ -54,8 +54,8 @@ unsigned ShaderManager::GetShader( const std::string& VertexFile, const std::str
         GLchar* infoLog = new GLchar[logSize];
         glGetShaderInfoLog( fragmentShader, logSize, &logSize, infoLog );
         glDeleteShader( fragmentShader );
-        Trace::Instance().Message( fmt::format( "Fragment Shader {}: {}\n", FragmentFile, infoLog ),
-                                   FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "Fragment Shader {}: {}\n", FragmentFile, infoLog ),
+                        FILENAME, LINENUMBER );
         delete[] infoLog;
     }
 
@@ -96,8 +96,8 @@ const char* ShaderManager::ReadFile( const std::string& FileName ) {
 
     std::ifstream file( FileName );
     if ( !file.is_open() ) {
-        Trace::Instance().Message( fmt::format( "Failed to open shader {}.", FileName ),
-                                   FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "Failed to open shader {}.", FileName ),
+                        FILENAME, LINENUMBER );
 
         source_list.erase( FileName );
         return nullptr;

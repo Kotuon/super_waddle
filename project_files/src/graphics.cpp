@@ -17,8 +17,6 @@
 #include "trace.hpp"
 #include "engine.hpp"
 #include "input.hpp"
-#include "object_manager.hpp"
-#include "component.hpp"
 #include "model_manager.hpp"
 #include "camera.hpp"
 #include "shader_manager.hpp"
@@ -33,7 +31,7 @@ Graphics::Graphics() {
 
 bool Graphics::Initialize() {
     if ( !glfwInit() ) {
-        Trace::Instance().Message( "Could not start GLFW.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not start GLFW.", FILENAME, LINENUMBER );
         return false;
     }
 
@@ -58,7 +56,7 @@ bool Graphics::Initialize() {
 
     // Ensure the window is set up correctly
     if ( !window ) {
-        Trace::Instance().Message( "Could not open GLFW window.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not open GLFW window.", FILENAME, LINENUMBER );
 
         glfwTerminate();
         return false;
@@ -68,19 +66,19 @@ bool Graphics::Initialize() {
     glfwMakeContextCurrent( window );
     gladLoadGL();
 
-    Trace::Instance().Message( fmt::format( "{}: {}",
-                                            CastToString( glGetString( GL_VENDOR ) ),
-                                            CastToString( glGetString( GL_RENDERER ) ) ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "GLFW\t {}",
-                                            glfwGetVersionString() ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "OpenGL\t {}",
-                                            CastToString( glGetString( GL_VERSION ) ) ),
-                               FILENAME, LINENUMBER );
-    Trace::Instance().Message( fmt::format( "GLSL\t {}",
-                                            CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ),
-                               FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "{}: {}",
+                                 CastToString( glGetString( GL_VENDOR ) ),
+                                 CastToString( glGetString( GL_RENDERER ) ) ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "GLFW\t {}",
+                                 glfwGetVersionString() ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "OpenGL\t {}",
+                                 CastToString( glGetString( GL_VERSION ) ) ),
+                    FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "GLSL\t {}",
+                                 CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ),
+                    FILENAME, LINENUMBER );
 
     // Enable depth (Z) buffer (accept "closest" fragment)
     glEnable( GL_DEPTH_TEST );
@@ -126,12 +124,8 @@ void Graphics::Update() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     // Draw your scene here
-    std::vector< std::unique_ptr< Object > >& objectList = ObjectManager::Instance().GetObjectList();
-    for ( std::unique_ptr< Object >& object : objectList ) {
-        DrawNormal( object.get(), projection );
-    }
-
     VerletManager::Instance().DrawVerlets( projection );
+    DrawNormal( projection );
 
     // Flip buffers
     glfwSwapBuffers( window );
@@ -140,38 +134,25 @@ void Graphics::Update() {
     glfwPollEvents();
 }
 
-void Graphics::DrawNormal( Object* ObjectToDraw, glm::mat4& Projection ) {
-    Model* model = ObjectToDraw->GetComponent< Model >();
-    if ( !model || model->GetMesh()->instanced || !ObjectToDraw->GetIsAlive() ) {
-        return;
-    }
+void Graphics::SetContainer( Model* Model, float Radius ) {
+    c_model = Model;
+    c_radius = Radius;
 
-    Transform* transform = ObjectToDraw->GetComponent< Transform >();
+    c_matrix = glm::scale( c_matrix, { c_radius, c_radius, c_radius } );
+}
 
-    glm::mat4 modelMatrix = glm::mat4( 1.f );
-    modelMatrix = glm::translate( modelMatrix, transform->GetPosition() );
-    modelMatrix = glm::rotate( modelMatrix,
-                               glm::radians( transform->GetRotation().x ),
-                               glm::vec3( 1, 0, 0 ) );
-    modelMatrix = glm::rotate( modelMatrix,
-                               glm::radians( transform->GetRotation().y ),
-                               glm::vec3( 0, 1, 0 ) );
-    modelMatrix = glm::rotate( modelMatrix,
-                               glm::radians( transform->GetRotation().z ),
-                               glm::vec3( 0, 0, 1 ) );
-    modelMatrix = glm::scale( modelMatrix, transform->GetScale() );
+void Graphics::DrawNormal( glm::mat4& Projection ) {
+    glUseProgram( c_model->GetShader() );
 
-    glUseProgram( model->GetShader() );
+    glUniformMatrix4fv( glGetUniformLocation( c_model->GetShader(), "model" ),
+                        1, GL_FALSE, &c_matrix[0][0] );
 
-    glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "model" ),
-                        1, GL_FALSE, &modelMatrix[0][0] );
-
-    glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
+    glUniformMatrix4fv( glGetUniformLocation( c_model->GetShader(), "projection" ),
                         1, GL_FALSE, &Projection[0][0] );
 
-    glBindVertexArray( model->GetMesh()->VAO );
+    glBindVertexArray( c_model->GetMesh()->VAO );
 
-    glDrawArrays( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices );
+    glDrawArrays( c_model->GetRenderMethod(), 0, c_model->GetMesh()->num_vertices );
 
     glUseProgram( 0 );
 
@@ -206,7 +187,7 @@ void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
                           std::string( Description ) +
                           std::to_string( Error );
 
-    Trace::Instance().Message( message, FILENAME, LINENUMBER );
+    Trace::Message( message, FILENAME, LINENUMBER );
 }
 
 Graphics& Graphics::Instance() {

@@ -17,21 +17,18 @@ Mesh::Mesh( std::string ModelFileName ) : model_file_name( ModelFileName ) {
 }
 
 Model::Model()
-    : Component( CType::CModel ),
-      mesh( nullptr ),
+    : mesh( nullptr ),
       render_method( GL_TRIANGLES ) {
 }
 
 Model::Model( Mesh* NewMesh, unsigned Shader )
-    : Component( CType::CModel ),
-      mesh( NewMesh ),
+    : mesh( NewMesh ),
       render_method( GL_TRIANGLES ),
       shader( Shader ) {
 }
 
 Model::Model( Mesh* NewMesh, unsigned RenderMethod, unsigned Shader )
-    : Component( CType::CModel ),
-      mesh( NewMesh ),
+    : mesh( NewMesh ),
       render_method( RenderMethod ),
       shader( Shader ) {
 }
@@ -63,10 +60,6 @@ unsigned Model::GetShader() const {
     return shader;
 }
 
-CType Model::GetCType() {
-    return CType::CModel;
-}
-
 ModelManager::ModelManager() {
 }
 
@@ -94,8 +87,8 @@ std::vector< float >* ModelManager::LoadObj( const std::string& ModelFileName ) 
     FILE* file;
     errno_t err = fopen_s( &file, ModelFileName.c_str(), "r" );
     if ( err != 0 ) {
-        Trace::Instance().Message( fmt::format( "Unable to open {}.", ModelFileName ),
-                                   FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "Unable to open {}.", ModelFileName ),
+                        FILENAME, LINENUMBER );
         return nullptr;
     }
 
