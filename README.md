@@ -9,7 +9,7 @@
 
 ## Introduction
 
-Super Waddle uses verlet integration to simulate over 36,000 particles inside a custom engine.
+Super Waddle uses verlet integration to simulate up to 36,000 particles inside a custom engine.
 
 ## Technology Used
 * C++ 20
