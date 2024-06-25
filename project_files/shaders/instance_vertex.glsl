@@ -15,18 +15,18 @@ out vec3 fragmentPos;
 out vec3 fragmentVertexNormal;
 out float fragmentVelocity;
 
-mat4 translationMatrix(vec3 translation, vec3 iscale)
+mat4 translationMatrix(vec3 translation)
 {
     return mat4(
-        vec4(iscale, 0.0, 0.0, 0.0),
-        vec4(0.0, iscale, 0.0, 0.0),
-        vec4(0.0, 0.0, iscale, 0.0),
-        vec4(translation, iscale));
+        vec4(instanceScale, 0.0, 0.0, 0.0),
+        vec4(0.0, instanceScale, 0.0, 0.0),
+        vec4(0.0, 0.0, instanceScale, 0.0),
+        vec4(translation, instanceScale));
 }
 
 void main()
 {
-    mat4 model = translationMatrix(instancePosition, instanceScale);
+    mat4 model = translationMatrix(instancePosition);
     fragmentPos = vec3(model * vec4(vertexPos, 1.0));
     fragmentVertexNormal = mat3(transpose(inverse(model))) * vertexNormal;
     fragmentVelocity = instanceVelocity;

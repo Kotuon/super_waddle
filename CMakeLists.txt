@@ -65,6 +65,10 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
     .gitignore
     .gitmodules)
 
+file (COPY project_files/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+#add_custom_target(copy_assets COMMAND ${CMAKE_COMMAND} -E copy_directory project_files/models ${CMAKE_BINARY_DIR}/models)
+
 #
 # Organizing files
 #
