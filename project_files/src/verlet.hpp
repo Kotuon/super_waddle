@@ -60,7 +60,7 @@ private:
 
     void ContainerCollision();
 
-    static constexpr unsigned MAX = 20000;
+    static constexpr unsigned MAX = 40000;
     static constexpr int DIM = 58;
     static constexpr int CELL_MAX = 4;
     static constexpr unsigned THREAD_COUNT = 24;
@@ -79,15 +79,15 @@ private:
     static constexpr float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
     static constexpr float VEL_DAMPING = 40.f;
 
-    unsigned amount_to_add = 10;
+    unsigned amount_to_add = 100;
 
     float c_radius;
 
     float dt;
 
-    float add_timer = 0.25f;
+    float add_timer = 0.15f;
     float toggle_timer = 0.25f;
-    unsigned curr_count = 0;
+    unsigned curr_count = 20000;
 
     ContainerShape c_shape;
 
