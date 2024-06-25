@@ -112,8 +112,6 @@ void VerletManager::Update() {
     add_timer += Engine::Instance().GetDeltaTime();
     toggle_timer += Engine::Instance().GetDeltaTime();
 
-    Trace::Message( fmt::format( "Update: {}", Engine::Instance().GetTotalTime() ), FILENAME, LINENUMBER );
-
     CollisionUpdate();
     PositionUpdate();
 }
