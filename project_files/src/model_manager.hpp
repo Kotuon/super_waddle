@@ -14,7 +14,7 @@
 constexpr unsigned VERTEX_LIMIT = 2000;
 constexpr unsigned STRIDE = 8;
 constexpr unsigned INSTANCE_STRIDE = 3;
-constexpr unsigned MAX_INSTANCES = 20000;
+constexpr unsigned MAX_INSTANCES = 40000;
 
 struct Mesh {
     Mesh();
@@ -26,7 +26,6 @@ struct Mesh {
     unsigned VBO;
     unsigned position_VBO;
     unsigned velocity_VBO;
-    unsigned scale_VBO;
     bool instanced;
 };
 

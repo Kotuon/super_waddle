@@ -95,7 +95,7 @@ bool Graphics::Initialize() {
     glPointSize( 3.0 );
 
     // Set default colour after clearing the colour buffer
-    glClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
+    glClearColor( 0.2f, 0.2f, 0.2f, 1.0f );
     glClearStencil( 0 );
 
     // Set callbacks

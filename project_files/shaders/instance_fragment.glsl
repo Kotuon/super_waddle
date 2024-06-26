@@ -13,7 +13,7 @@ void main()
     vec3 lightColor = vec3(1.0, 1.0, 1.0);
     vec3 lightPos = vec3(10.0, 10.0, 10.0);
 
-    vec3 objectColor = vec3(1.0, 0.713, 0.757);
+    vec3 objectColor = vec3(0.7137, 0.8471, 1.0);
 
     objectColor = objectColor * (fragmentVelocity + 0.1);
     // objectColor = vec3(1.0, 0.713, 0.757);

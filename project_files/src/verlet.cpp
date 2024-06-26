@@ -56,8 +56,6 @@ void VerletManager::CreateVerlets( ContainerShape CShape ) {
         vec_set_f( verlet_list[i]->position, x, y, z );
         vec_set_f( verlet_list[i]->old_position, x * 0.999f, y, z * 0.999f );
         vec_set_f( verlet_list[i]->acceleration, 0.f, 0.f, 0.f );
-
-        scales[i] = verlet_list[i]->radius;
     }
 }
 
@@ -331,16 +329,12 @@ void VerletManager::DrawVerlets( glm::mat4& Projection ) {
     glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, velocities.data() );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
-    glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->scale_VBO );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, scales.data() );
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
     glUseProgram( model->GetShader() );
 
     glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
                         1, GL_FALSE, &Projection[0][0] );
 
-    // glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ), verlet_list[0]->radius );
+    glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ), verlet_list[0]->radius );
 
     glBindVertexArray( model->GetMesh()->VAO );
 
