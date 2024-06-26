@@ -17,3 +17,12 @@
 [submodule "project_files/vendor/fmt"]
 	path = project_files/vendor/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "project_files/vendor/imgui"]
+	path = project_files/vendor/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "project_files/vendor/imguizmo"]
+	path = project_files/vendor/imguizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "project_files/vendor/imguicolortextedit"]
+	path = project_files/vendor/imguicolortextedit
+	url = https://github.com/BalazsJako/ImGuiColorTextEdit
