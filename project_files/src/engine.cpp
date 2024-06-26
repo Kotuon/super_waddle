@@ -12,6 +12,7 @@
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
 #include "verlet.hpp"
+#include "editor.hpp"
 
 static float ContainerRadius = 6.f * 1.02f;
 // static float ContainerRadius = 6.f * 2.f + 0.15f * 3.f;
@@ -27,6 +28,10 @@ bool Engine::Initialize() {
 
     if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 5.f, 20.f ) ) ) {
         Trace::Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
+    }
+
+    if ( !Editor::Instance().Initialize() ) {
+        Trace::Message( "Editor failed to initialize.", FILENAME, LINENUMBER );
     }
 
     ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
@@ -90,6 +95,7 @@ void Engine::Update() {
 
         // Non-fixed time step update calls
         // TODO: will be moved around
+        Editor::Instance().Update();
         Camera::Instance().Update();
 
         Graphics::Instance().Update();

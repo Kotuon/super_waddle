@@ -21,6 +21,7 @@
 #include "camera.hpp"
 #include "shader_manager.hpp"
 #include "verlet.hpp"
+#include "editor.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -126,6 +127,8 @@ void Graphics::Update() {
     // Draw your scene here
     VerletManager::Instance().DrawVerlets( projection );
     DrawNormal( projection );
+
+    Editor::Instance().Render();
 
     // Flip buffers
     glfwSwapBuffers( window );
