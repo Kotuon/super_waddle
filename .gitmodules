@@ -20,6 +20,7 @@
 [submodule "project_files/vendor/imgui"]
 	path = project_files/vendor/imgui
 	url = https://github.com/ocornut/imgui
+	branch = docking
 [submodule "project_files/vendor/imguizmo"]
 	path = project_files/vendor/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
