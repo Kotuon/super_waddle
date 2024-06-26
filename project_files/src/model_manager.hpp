@@ -26,7 +26,6 @@ struct Mesh {
     unsigned VBO;
     unsigned position_VBO;
     unsigned velocity_VBO;
-    unsigned scale_VBO;
     bool instanced;
 };
 

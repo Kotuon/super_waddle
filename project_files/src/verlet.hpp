@@ -68,16 +68,15 @@ private:
     std::array< std::unique_ptr< Verlet >, MAX > verlet_list;
     std::array< float, MAX * 3 > positions{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
-    std::array< float, MAX > scales{ 0.f };
 
     std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
     std::array< std::thread, THREAD_COUNT > threads;
 
     Model* model;
 
-    static constexpr float force_vec[VEC3] = { 0.f, 0.f, 0.f };
+    static constexpr float force_vec[VEC3] = { 0.f, 3.f, 0.f };
     static constexpr float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
-    static constexpr float VEL_DAMPING = 40.f;
+    static constexpr float VEL_DAMPING = 20.f;
 
     unsigned amount_to_add = 100;
 
@@ -87,7 +86,7 @@ private:
 
     float add_timer = 0.15f;
     float toggle_timer = 0.25f;
-    unsigned curr_count = 20000;
+    unsigned curr_count = 0;
 
     ContainerShape c_shape;
 
