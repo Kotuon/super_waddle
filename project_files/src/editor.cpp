@@ -7,6 +7,7 @@
 // Local includes
 #include "editor.hpp"
 #include "graphics.hpp"
+#include "engine.hpp"
 
 Editor::Editor() {
 }
@@ -34,6 +35,9 @@ bool Editor::Initialize() {
     ImGui_ImplGlfw_InitForOpenGL( Graphics::Instance().GetWindow(), true );
     ImGui_ImplOpenGL3_Init( "#version 330" );
 
+    Engine::Instance().AddUpdateCallback( std::bind( &Editor::Update, this ) );
+    Graphics::Instance().AddRenderCallback( std::bind( &Editor::Render, this ) );
+
     return true;
 }
 
@@ -43,10 +47,14 @@ void Editor::Update() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
 
     // Display the different windows
     Display_Dockspace();
+
+    for ( auto& func : display_menu_callbacks ) {
+        func();
+    }
 }
 
 void Editor::Render() {
@@ -94,16 +102,16 @@ void Editor::Display_Dockspace() {
 
 void Editor::Display_Menu_Bar() {
     if ( ImGui::BeginMenuBar() ) {
-        if ( ImGui::BeginMenu( "File##1" ) ) {
-            if ( ImGui::MenuItem( "Save##1" ) ) {
-                // Engine::Write();
-            }
-            if ( ImGui::MenuItem( "Save As..##1" ) ) {
-                // ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey##7", "Choose File", ".json", std::string( getenv( "USERPROFILE" ) ) + "/Documents/pEngine/json/preset" );
-            }
+        // if ( ImGui::BeginMenu( "File##1" ) ) {
+        // if ( ImGui::MenuItem( "Save##1" ) ) {
+        // Engine::Write();
+        // }
+        // if ( ImGui::MenuItem( "Save As..##1" ) ) {
+        // ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey##7", "Choose File", ".json", std::string( getenv( "USERPROFILE" ) ) + "/Documents/pEngine/json/preset" );
+        // }
 
-            ImGui::EndMenu();
-        }
+        //     ImGui::EndMenu();
+        // }
 
         ImGui::EndMenuBar();
     }

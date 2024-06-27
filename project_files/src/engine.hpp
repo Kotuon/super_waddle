@@ -3,7 +3,10 @@
 #define ENGINE_HPP
 #pragma once
 
+// std includes
 #include <chrono>
+#include <functional>
+#include <vector>
 
 using namespace std::chrono;
 
@@ -20,6 +23,16 @@ public:
 
     void TriggerShutdown();
 
+    template < typename TCallback >
+    inline void AddFixedUpdateCallback( TCallback&& Callback ) {
+        fixed_update_callbacks.insert( fixed_update_callbacks.begin(), Callback );
+    }
+
+    template < typename TCallback >
+    inline void AddUpdateCallback( TCallback&& Callback ) {
+        update_callbacks.insert( update_callbacks.begin(), Callback );
+    }
+
     static Engine& Instance();
 
 private:
@@ -28,6 +41,9 @@ private:
     steady_clock::time_point last_time; //!< last update time
     steady_clock::time_point curr_time; //!< new update time
     steady_clock::duration time_taken;  //!< time between frames
+
+    std::vector< std::function< void() > > update_callbacks;
+    std::vector< std::function< void() > > fixed_update_callbacks;
 
     float delta_time;                                //!< time between frames
     float accumulator;                               //!< amount of unused time for physics update

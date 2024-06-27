@@ -14,9 +14,6 @@
 #include "verlet.hpp"
 #include "editor.hpp"
 
-static float ContainerRadius = 6.f * 1.02f;
-// static float ContainerRadius = 6.f * 2.f + 0.15f * 3.f;
-
 Engine::Engine() {
 }
 
@@ -38,19 +35,10 @@ bool Engine::Initialize() {
                                          "shaders/phong_fragment.glsl" );
     ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
                                          "shaders/instance_fragment.glsl" );
-    unsigned base_shader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
-                                                                "shaders/base_fragment.glsl" );
-
-    Model* base_model = ModelManager::Instance().GetModel( "models/sphere.obj", GL_POINTS,
-                                                           base_shader, false );
-
-    // Model* base_model = ModelManager::Instance().GetModel( "models/cube.obj", GL_TRIANGLES,
-    //                                                        base_shader, false );
-
-    Graphics::Instance().SetContainer( base_model, ContainerRadius );
+    ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
+                                         "shaders/base_fragment.glsl" );
 
     VerletManager::Instance().CreateVerlets( ContainerShape::Sphere );
-    VerletManager::Instance().SetContainerRadius( 6.f );
 
     last_time = steady_clock::now();
     accumulator = 0.f;
@@ -87,7 +75,9 @@ void Engine::Update() {
         while ( accumulator >= fixed_time_step ) {
             // Call fixed updates here
 
-            VerletManager::Instance().Update();
+            for ( auto& func : fixed_update_callbacks ) {
+                func();
+            }
 
             accumulator -= fixed_time_step;
             time += fixed_time_step;
@@ -95,10 +85,10 @@ void Engine::Update() {
 
         // Non-fixed time step update calls
         // TODO: will be moved around
-        Editor::Instance().Update();
-        Camera::Instance().Update();
 
-        Graphics::Instance().Update();
+        for ( auto& func : update_callbacks ) {
+            func();
+        }
     }
 }
 
