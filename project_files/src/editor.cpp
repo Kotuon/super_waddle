@@ -9,6 +9,17 @@
 #include "graphics.hpp"
 #include "engine.hpp"
 
+void Editor::HelpMarker( const char* desc ) {
+    ImGui::TextDisabled( "(?)" );
+    if ( ImGui::IsItemHovered( ImGuiHoveredFlags_DelayShort ) ) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos( ImGui::GetFontSize() * 35.0f );
+        ImGui::TextUnformatted( desc );
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 Editor::Editor() {
 }
 

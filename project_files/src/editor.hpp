@@ -19,6 +19,8 @@ public:
         display_menu_callbacks.insert( display_menu_callbacks.begin(), Callback );
     }
 
+    static void HelpMarker(const char* desc);
+
     static Editor& Instance();
 
 private:
