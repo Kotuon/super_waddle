@@ -89,6 +89,9 @@ void Engine::Update() {
         for ( auto& func : update_callbacks ) {
             func();
         }
+
+        Camera::Instance().Update();
+        Graphics::Instance().Update();
     }
 }
 

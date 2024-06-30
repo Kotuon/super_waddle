@@ -102,6 +102,8 @@ private:
 
     float toggle_timer = 0.25f;
 
+    float fps_limit = 90.f;
+
     int amount_to_add = 100;
     unsigned curr_count = 0;
 

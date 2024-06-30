@@ -19,8 +19,6 @@ bool Camera::Initialize( glm::vec3 Position ) {
 
     UpdateVectors();
 
-    Engine::Instance().AddUpdateCallback( std::bind( &Camera::Update, this ) );
-
     return true;
 }
 

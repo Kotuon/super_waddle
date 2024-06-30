@@ -108,8 +108,6 @@ bool Graphics::Initialize() {
         static_cast< float >( windowWidth ) / static_cast< float >( windowHeight ),
         0.1f, 100.0f );
 
-    Engine::Instance().AddUpdateCallback( std::bind( &Graphics::Update, this ) );
-
     return true;
 }
 

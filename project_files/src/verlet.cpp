@@ -94,7 +94,7 @@ void VerletManager::AddVerlet() {
         return;
     }
 
-    if ( ( 1.f / Engine::Instance().GetDeltaTime() ) < 90.f ) {
+    if ( ( 1.f / Engine::Instance().GetDeltaTime() ) < fps_limit ) {
         return;
     }
 
@@ -429,6 +429,7 @@ void VerletManager::DisplayMenu() {
     ImGui::Begin( "VerletIntegration##1" );
 
     ImGui::Text( fmt::format( "Particle count: {}", curr_count ).c_str() );
+    ImGui::SliderFloat( "FPS Limit", &fps_limit, 30.f, 90.f );
     ImGui::SliderFloat( "Verlet radius", &verlet_radius, 0.15f, 0.5f );
 
     ImGui::SeparatorText( "Amount to add" );
