@@ -76,14 +76,10 @@ Input& Input::Instance() {
     return inputInstance;
 }
 
-void Input::AddWASDCallback( void ( *func )( glm::vec3 ) ) {
+void Input::AddWASDCallback( std::function< void( glm::vec3 ) > func ) {
     wasd_callbacks.push_back( func );
 }
 
-void Input::AddArrowCallback( void ( *func )( glm::vec2 ) ) {
+void Input::AddArrowCallback( std::function< void( glm::vec2 ) > func ) {
     arrow_callbacks.push_back( func );
-}
-
-void Input::AddCallback( int key, void ( *func )() ) {
-    key_map[key].push_back( func );
 }

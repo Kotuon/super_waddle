@@ -20,7 +20,7 @@
 #include "model_manager.hpp"
 #include "camera.hpp"
 #include "shader_manager.hpp"
-#include "verlet.hpp"
+#include "editor.hpp"
 
 static const char* CastToString( const unsigned char* input ) {
     return reinterpret_cast< const char* >( input );
@@ -124,8 +124,9 @@ void Graphics::Update() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     // Draw your scene here
-    VerletManager::Instance().DrawVerlets( projection );
-    DrawNormal( projection );
+    for ( auto& func : render_callbacks ) {
+        func();
+    }
 
     // Flip buffers
     glfwSwapBuffers( window );
@@ -134,25 +135,18 @@ void Graphics::Update() {
     glfwPollEvents();
 }
 
-void Graphics::SetContainer( Model* Model, float Radius ) {
-    c_model = Model;
-    c_radius = Radius;
+void Graphics::DrawNormal( Model* Model, glm::mat4& Matrix ) {
+    glUseProgram( Model->GetShader() );
 
-    c_matrix = glm::scale( c_matrix, { c_radius, c_radius, c_radius } );
-}
+    glUniformMatrix4fv( glGetUniformLocation( Model->GetShader(), "model" ),
+                        1, GL_FALSE, &Matrix[0][0] );
 
-void Graphics::DrawNormal( glm::mat4& Projection ) {
-    glUseProgram( c_model->GetShader() );
+    glUniformMatrix4fv( glGetUniformLocation( Model->GetShader(), "projection" ),
+                        1, GL_FALSE, &projection[0][0] );
 
-    glUniformMatrix4fv( glGetUniformLocation( c_model->GetShader(), "model" ),
-                        1, GL_FALSE, &c_matrix[0][0] );
+    glBindVertexArray( Model->GetMesh()->VAO );
 
-    glUniformMatrix4fv( glGetUniformLocation( c_model->GetShader(), "projection" ),
-                        1, GL_FALSE, &Projection[0][0] );
-
-    glBindVertexArray( c_model->GetMesh()->VAO );
-
-    glDrawArrays( c_model->GetRenderMethod(), 0, c_model->GetMesh()->num_vertices );
+    glDrawArrays( Model->GetRenderMethod(), 0, Model->GetMesh()->num_vertices );
 
     glUseProgram( 0 );
 
@@ -188,6 +182,10 @@ void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
                           std::to_string( Error );
 
     Trace::Message( message, FILENAME, LINENUMBER );
+}
+
+glm::mat4 Graphics::GetProjection() {
+    return projection;
 }
 
 Graphics& Graphics::Instance() {

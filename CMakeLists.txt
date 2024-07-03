@@ -43,18 +43,22 @@ include_directories(project_files/src/
     project_files/vendor/glm/
     project_files/vendor/stb/
     project_files/vendor/fmt/include
-    project_files/vendor/eigen)
+    project_files/vendor/imgui
+    project_files/vendor/imguizmo
+    project_files/vendor/imguicolortextedit)
 
 #
 # Add files
 #
 file(GLOB VENDORS_SOURCES project_files/vendor/glad/src/glad.c)
 file(GLOB_RECURSE PROJECT_HEADERS project_files/src/*.hpp
-    project_files/src/*.h project_files/vendor/eigenlib/*.h)
+    project_files/src/*.h project_files/vendor/imgui/*.h
+    project_files/vendor/imgui/backends/*.h)
 file(GLOB_RECURSE PROJECT_SOURCES project_files/src/*.cpp
     project_files/src/*.cxx
     project_files/src/*.cc
-    project_files/src/*.c)
+    project_files/src/*.c
+    project_files/vendor/imgui/*.cpp)
 file(GLOB_RECURSE PROJECT_SHADERS project_files/shaders/*.comp
     project_files/shaders/*.frag
     project_files/shaders/*.geom

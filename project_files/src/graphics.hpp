@@ -3,6 +3,10 @@
 #define GRAPHICS_HPP
 #pragma once
 
+// std includes
+#include <functional>
+#include <vector>
+
 // System headers
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -18,28 +22,32 @@ public:
     void Update();
     void Shutdown();
 
+    void DrawNormal( Model* Model, glm::mat4& Matrix );
+
     GLFWwindow* GetWindow() const;
 
     static void FrameBufferSizeCallback( GLFWwindow* Window, int Width, int Height );
     static void CursorEnterCallback( GLFWwindow* Window, int Entered );
 
     static void GLFWErrorCallback( int Error, const char* Description );
-    static Graphics& Instance();
 
-    void SetContainer( Model* Model, float Radius );
+    template < typename TCallback >
+    inline void AddRenderCallback( TCallback&& Callback ) {
+        render_callbacks.push_back( Callback );
+    }
+
+    glm::mat4 GetProjection();
+
+    static Graphics& Instance();
 
 private:
     Graphics();
 
-    void DrawNormal( glm::mat4& Projection );
+    std::vector< std::function< void() > > render_callbacks;
 
     GLFWwindow* window;
 
     glm::mat4 projection;
-
-    glm::mat4 c_matrix = glm::mat4( 1.f );
-    Model* c_model;
-    float c_radius;
 };
 
 // Function for handling keypresses

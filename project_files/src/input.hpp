@@ -28,20 +28,23 @@ public:
 
     static Input& Instance();
 
-    void AddWASDCallback( void ( *func )( glm::vec3 ) );
-    void AddArrowCallback( void ( *func )( glm::vec2 ) );
+    void AddWASDCallback( std::function< void( glm::vec3 ) > );
+    void AddArrowCallback( std::function< void( glm::vec2 ) > );
 
-    void AddCallback( int key, void ( *func )() );
+    template < typename TCallback >
+    inline void AddCallback( int key, TCallback&& Callback ) {
+        key_map[key].push_back( Callback );
+    }
 
 private:
     Input();
 
     void UpdateMouse( GLFWwindow* Window );
 
-    std::vector< void ( * )( glm::vec3 ) > wasd_callbacks;
-    std::vector< void ( * )( glm::vec2 ) > arrow_callbacks;
+    std::vector< std::function< void( glm::vec3 ) > > wasd_callbacks;
+    std::vector< std::function< void( glm::vec2 ) > > arrow_callbacks;
 
-    std::unordered_map< int, std::vector< void ( * )() > > key_map;
+    std::unordered_map< int, std::vector< std::function< void() > > > key_map;
 
     Mouse mouse;
 };

@@ -15,18 +15,25 @@
 // Local includes
 #include "math.hpp"
 
-struct Verlet {
-    float position[VEC3];
-    float old_position[VEC3];
-    float acceleration[VEC3];
-    float radius = 0.15f;
-};
-
 class Model;
 
 enum ContainerShape {
     Sphere,
     Cube,
+};
+
+struct Container {
+    Model* model;
+    glm::mat4 matrix;
+    float model_radius;
+    float collision_radius = 6.f;
+    ContainerShape shape;
+};
+
+struct Verlet {
+    float position[VEC3];
+    float old_position[VEC3];
+    float acceleration[VEC3];
 };
 
 struct VerletManager {
@@ -37,22 +44,27 @@ public:
     void CollisionUpdate();
     void PositionUpdate();
 
-    void DrawVerlets( glm::mat4& Projection );
+    void DrawVerlets();
 
-    static void AddVerlet();
-    static void ApplyForce();
-    static void ToggleForce();
-
-    void SetContainerRadius( float Radius );
+    void AddVerlet();
+    void RemoveVerlet();
+    void ApplyForce();
+    void ToggleForce();
 
     static VerletManager& Instance();
 
     unsigned GetCurrCount() const;
 
+    void DisplayMenu();
+
 private:
     void ClearGrid();
     void FillGrid();
     void InsertNode( int x, int y, int z, Verlet* obj );
+
+    void SetupVerletPosition( Verlet* verlet, int i );
+    void SetupVerlets();
+    void SetupContainer( ContainerShape CShape );
 
     void GridCollision();
     void GridCollisionThread( int ThreadId );
@@ -65,30 +77,37 @@ private:
     static constexpr int CELL_MAX = 4;
     static constexpr unsigned THREAD_COUNT = 24;
 
-    std::array< std::unique_ptr< Verlet >, MAX > verlet_list;
+    std::array< std::unique_ptr< Verlet >, MAX > verlet_list{ nullptr };
     std::array< float, MAX * 3 > positions{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
 
     std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
     std::array< std::thread, THREAD_COUNT > threads;
 
+    glm::mat4 projection;
+
     Model* model;
+    Container container;
 
-    static constexpr float force_vec[VEC3] = { 0.f, 3.f, 0.f };
-    static constexpr float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
-    static constexpr float VEL_DAMPING = 20.f;
+    float force_vec[VEC3] = { 0.f, 3.f, 0.f };
+    float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
+    float vel_damping = 20.f;
 
-    unsigned amount_to_add = 100;
-
-    float c_radius;
+    float verlet_radius = 0.15f;
 
     float dt;
 
-    float add_timer = 0.15f;
+    float add_timer = 0.25f;
+    float add_cooldown = 0.1f;
+
     float toggle_timer = 0.25f;
+
+    float fps_limit = 90.f;
+
+    int amount_to_add = 100;
     unsigned curr_count = 0;
 
-    ContainerShape c_shape;
+    bool should_simulate = true;
 
     bool force_toggle = false;
 };

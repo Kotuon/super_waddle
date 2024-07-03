@@ -123,7 +123,7 @@ void Profiler::Record() {
 
         // Saving to list and checking if max samples have been gotten
         eip_list.push_back( context );
-        if ( eip_list.size() >= 100000 ) {
+        if ( eip_list.size() >= 10000 ) {
             return;
         }
 
