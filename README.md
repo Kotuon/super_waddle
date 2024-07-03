@@ -16,6 +16,7 @@ Super Waddle uses verlet integration to simulate up to 36,000 particles inside a
 * GLFW 3.3.4
 * GLAD
 * GLM
+* Dear ImGUI
 
 ## Requirements
 Built for Windows 10 using CMake.
