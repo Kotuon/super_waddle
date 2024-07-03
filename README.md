@@ -28,6 +28,7 @@ Built for Windows 10 using CMake.
 * Sampling profiler.
 * Benchmark class.
 * Logging system.
+* Octree for collision optimization.
 
 ## References
 Primary reference was this [implementation of verlet integration in C.](https://github.com/marichardson137/VerletIntegration/tree/main)
