@@ -14,7 +14,7 @@
 constexpr unsigned VERTEX_LIMIT = 2000;
 constexpr unsigned STRIDE = 8;
 constexpr unsigned INSTANCE_STRIDE = 3;
-constexpr unsigned MAX_INSTANCES = 40000;
+constexpr unsigned MAX_INSTANCES = 80000;
 
 struct Mesh {
     Mesh();
