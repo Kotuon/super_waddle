@@ -173,13 +173,6 @@ void VerletManager::CollisionUpdate() {
     octree->FillTree( verlet_list, verlet_radius, curr_count );
     octree->CheckCollisions();
 
-    // for ( int i = 0; i < THREAD_COUNT; ++i ) {
-    //     threads[i] = std::thread( &VerletManager::GridCollisionThread, this, i );
-    // }
-    // for ( std::thread& thd : threads ) {
-    //     thd.join();
-    // }
-
     ContainerCollision();
 }
 
