@@ -168,17 +168,6 @@ void VerletManager::Update() {
         return;
     }
 
-    CollisionUpdate();
-
-    for ( int i = 0; i < THREAD_COUNT; ++i ) {
-        threads[i] = std::thread( &VerletManager::PositionUpdateThread, this, i );
-    }
-    for ( std::thread& thd : threads ) {
-        thd.join();
-    }
-}
-
-void VerletManager::CollisionUpdate() {
     if ( curr_count <= 0 ) {
         return;
     }
@@ -188,6 +177,13 @@ void VerletManager::CollisionUpdate() {
     octree->CheckCollisions();
 
     ContainerCollision();
+
+    for ( int i = 0; i < THREAD_COUNT; ++i ) {
+        threads[i] = std::thread( &VerletManager::PositionUpdateThread, this, i );
+    }
+    for ( std::thread& thd : threads ) {
+        thd.join();
+    }
 }
 
 void VerletManager::CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 ) {
