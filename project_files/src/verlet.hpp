@@ -31,9 +31,9 @@ struct Container {
 };
 
 struct Verlet {
-    float position[VEC3];
-    float old_position[VEC3];
-    float acceleration[VEC3];
+    vec4 position{ 0.f };
+    vec4 old_position{ 0.f };
+    vec4 acceleration{ 0.f };
 };
 
 struct VerletManager {
@@ -89,8 +89,8 @@ private:
     Model* model;
     Container container;
 
-    float force_vec[VEC3] = { 0.f, 3.f, 0.f };
-    float grav_vec[VEC3] = { 0.f, -4.5f, 0.f };
+    vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
+    vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
     float vel_damping = 20.f;
 
     float verlet_radius = 0.15f;

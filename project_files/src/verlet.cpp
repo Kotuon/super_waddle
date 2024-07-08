@@ -122,17 +122,17 @@ void VerletManager::ApplyForce() {
     }
 
     for ( unsigned i = 0; i < curr_count; ++i ) {
-        Verlet* v = verlet_list[i].get();
+        Verlet* verlet = verlet_list[i].get();
 
-        float disp[VEC3];
-        vec_sub( disp, v->position, force_vec );
+        vec4 disp( 0.f );
+        disp = vec_sub( verlet->position, force_position );
         float dist = vec_length( disp );
 
         if ( dist > 0 ) {
-            float norm[VEC3];
-            vec_divide_f( norm, disp, dist );
-            vec_mul_f( norm, norm, -30.f );
-            vec_add( v->acceleration, v->acceleration, norm );
+            vec4 norm( 0.f );
+            norm = vec_divide_f( disp, dist );
+            norm = vec_mul_f( norm, -30.f );
+            verlet->acceleration = vec_add( verlet->acceleration, norm );
         }
     }
 }
@@ -248,17 +248,17 @@ void VerletManager::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) 
             Verlet* v2 = OtherCell[b];
 
             if ( v1 != v2 ) {
-                float axis[VEC3];
-                vec_sub( axis, v1->position, v2->position );
+                vec4 axis( 0.f );
+                axis = vec_sub( v1->position, v2->position );
                 float dist = vec_length( axis );
                 if ( dist < verlet_radius + verlet_radius ) {
-                    float norm[VEC3];
-                    vec_divide_f( norm, axis, dist );
+                    vec4 norm( 0.f );
+                    norm = vec_divide_f( axis, dist );
 
                     float delta = verlet_radius + verlet_radius - dist;
-                    vec_mul_f( norm, norm, 0.5f * delta );
-                    vec_add( v1->position, v1->position, norm );
-                    vec_sub( v2->position, v2->position, norm );
+                    norm = vec_mul_f( norm, 0.5f * delta );
+                    v1->position = vec_add( v1->position, norm );
+                    v2->position = vec_sub( v2->position, norm );
                 }
             }
         }
@@ -266,19 +266,18 @@ void VerletManager::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) 
 }
 
 void VerletManager::ContainerCollision() {
-
     switch ( container.shape ) {
     case Sphere:
         for ( unsigned i = 0; i < curr_count; ++i ) {
             Verlet* v = verlet_list[i].get();
 
-            float disp[VEC3]{ v->position[0], v->position[1], v->position[2] };
+            vec4 disp( v->position.x, v->position.y, v->position.z, 0.f );
             float dist = vec_length( disp );
 
             if ( dist > ( container.collision_radius - verlet_radius ) ) {
-                float norm[VEC3];
-                vec_divide_f( norm, disp, dist );
-                vec_mul_f( norm, norm, container.collision_radius - verlet_radius );
+                vec4 norm( 0.f );
+                norm = vec_divide_f( disp, dist );
+                norm = vec_mul_f( norm, container.collision_radius - verlet_radius );
                 vec_set( v->position, norm );
             }
         }
@@ -313,32 +312,32 @@ void VerletManager::PositionUpdate() {
         Verlet* verlet = verlet_list[i].get();
 
         if ( force_toggle ) {
-            float disp[VEC3];
-            vec_sub( disp, verlet->position, force_vec );
+            vec4 disp( 0.f );
+            disp = vec_sub( verlet->position, force_position );
             float dist = vec_length( disp );
 
             if ( dist > 0 ) {
-                float norm[VEC3];
-                vec_divide_f( norm, disp, dist );
-                vec_mul_f( norm, norm, -30.f );
-                vec_add( verlet->acceleration, verlet->acceleration, norm );
+                vec4 norm( 0.f );
+                norm = vec_divide_f( disp, dist );
+                norm = vec_mul_f( norm, -30.f );
+                verlet->acceleration = vec_add( verlet->acceleration, norm );
             }
         }
 
-        vec_add( verlet->acceleration, verlet->acceleration, grav_vec );
+        verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
 
-        float temp[VEC3]{ verlet->position[0], verlet->position[1], verlet->position[2] };
-        float disp[VEC3];
-        vec_sub( disp, verlet->position, verlet->old_position );
+        vec4 temp( verlet->position[0], verlet->position[1], verlet->position[2], 0.f );
+        vec4 disp( 0.f );
+        disp = vec_sub( verlet->position, verlet->old_position );
         vec_set( verlet->old_position, verlet->position );
 
-        float forceReduction[VEC3];
-        vec_mul_f( forceReduction, disp, vel_damping );
-        vec_sub( verlet->acceleration, verlet->acceleration, forceReduction );
+        vec4 forceReduction( 0.f );
+        forceReduction = vec_mul_f( disp, vel_damping );
+        verlet->acceleration = vec_sub( verlet->acceleration, forceReduction );
 
-        vec_mul_f( verlet->acceleration, verlet->acceleration, dt * dt );
-        vec_add( verlet->position, verlet->position, disp );
-        vec_add( verlet->position, verlet->position, verlet->acceleration );
+        verlet->acceleration = vec_mul_f( verlet->acceleration, dt * dt );
+        verlet->position = vec_add( verlet->position, disp );
+        verlet->position = vec_add( verlet->position, verlet->acceleration );
 
         vec_zero( verlet->acceleration );
     }
@@ -451,12 +450,12 @@ void VerletManager::DisplayMenu() {
     ImGui::Checkbox( "Should simulate##1", &should_simulate );
 
     ImGui::SeparatorText( "Forces" );
-    ImGui::SliderFloat3( "Force position", force_vec, -10.f, 10.f );
+    ImGui::SliderFloat3( "Force position", force_position.a, -10.f, 10.f );
     ImGui::Checkbox( "Toggle force##1", &force_toggle );
 
     ImGui::Separator();
 
-    ImGui::SliderFloat3( "Gravity position", grav_vec, -5.f, 5.f );
+    ImGui::SliderFloat3( "Gravity position", grav_vec.a, -5.f, 5.f );
     ImGui::SliderFloat( "Velocity damping", &vel_damping, 0.f, 100.f );
 
     ImGui::SeparatorText( "Container shape" );
