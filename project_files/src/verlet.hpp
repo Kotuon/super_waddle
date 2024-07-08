@@ -6,7 +6,6 @@
 // std includes
 #include <array>
 #include <memory>
-#include <thread>
 #include <queue>
 
 // System includes
@@ -15,6 +14,7 @@
 // Local includes
 #include "math.hpp"
 
+class Octree;
 class Model;
 
 enum ContainerShape {
@@ -57,32 +57,24 @@ public:
 
     void DisplayMenu();
 
-private:
-    void ClearGrid();
-    void FillGrid();
-    void InsertNode( int x, int y, int z, Verlet* obj );
+    static constexpr unsigned MAX = 40000;
 
+private:
     void SetupVerletPosition( Verlet* verlet, int i );
     void SetupVerlets();
     void SetupContainer( ContainerShape CShape );
 
-    void GridCollision();
-    void GridCollisionThread( int ThreadId );
-    void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell );
+    // void GridCollision();
+    // void GridCollisionThread( int ThreadId );
+    // void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell );
+
+    void CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 );
 
     void ContainerCollision();
-
-    static constexpr unsigned MAX = 40000;
-    static constexpr int DIM = 58;
-    static constexpr int CELL_MAX = 4;
-    static constexpr unsigned THREAD_COUNT = 24;
 
     std::array< std::unique_ptr< Verlet >, MAX > verlet_list{ nullptr };
     std::array< float, MAX * 3 > positions{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
-
-    std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
-    std::array< std::thread, THREAD_COUNT > threads;
 
     glm::mat4 projection;
 
@@ -91,6 +83,9 @@ private:
 
     vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
     vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
+
+    std::unique_ptr< Octree > octree;
+
     float vel_damping = 20.f;
 
     float verlet_radius = 0.15f;

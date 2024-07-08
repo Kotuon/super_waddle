@@ -19,6 +19,7 @@
 #include "math.hpp"
 #include "graphics.hpp"
 #include "editor.hpp"
+#include "octree.hpp"
 
 void VerletManager::CreateVerlets( ContainerShape CShape ) {
     projection = Graphics::Instance().GetProjection();
@@ -37,6 +38,11 @@ void VerletManager::CreateVerlets( ContainerShape CShape ) {
     model = ModelManager::Instance().GetModel( "models/sphere.obj", instance_shader, true );
 
     dt = Engine::Instance().GetFixedTimeStep();
+
+    octree = std::make_unique< Octree >();
+    octree->SetVerletCollisionCallback( std::bind(
+        &VerletManager::CheckCollisionBetweenVerlets, this,
+        std::placeholders::_1, std::placeholders::_2 ) );
 
     SetupContainer( CShape );
     SetupVerlets();
@@ -163,104 +169,33 @@ void VerletManager::CollisionUpdate() {
         return;
     }
 
-    ClearGrid();
-    FillGrid();
+    octree->ClearTree();
+    octree->FillTree( verlet_list, verlet_radius, curr_count );
+    octree->CheckCollisions();
 
-    for ( int i = 0; i < THREAD_COUNT; ++i ) {
-        threads[i] = std::thread( &VerletManager::GridCollisionThread, this, i );
-    }
-    for ( std::thread& thd : threads ) {
-        thd.join();
-    }
+    // for ( int i = 0; i < THREAD_COUNT; ++i ) {
+    //     threads[i] = std::thread( &VerletManager::GridCollisionThread, this, i );
+    // }
+    // for ( std::thread& thd : threads ) {
+    //     thd.join();
+    // }
 
     ContainerCollision();
 }
 
-void VerletManager::GridCollision() {
-    for ( unsigned x = 1; x < DIM - 1; ++x ) {
-        for ( unsigned y = 1; y < DIM - 1; ++y ) {
-            for ( unsigned z = 1; z < DIM - 1; ++z ) {
-                Verlet** currentCell = &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
+void VerletManager::CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 ) {
+    if ( Verlet1 != Verlet2 ) {
+        vec4 axis( 0.f );
+        axis = vec_sub( Verlet1->position, Verlet2->position );
+        float dist = vec_length( axis );
+        if ( dist < verlet_radius + verlet_radius ) {
+            vec4 norm( 0.f );
+            norm = vec_divide_f( axis, dist );
 
-                if ( !currentCell[0] ) {
-                    continue;
-                }
-
-                for ( int dx = -1; dx <= 1; ++dx ) {
-                    for ( int dy = -1; dy <= 1; ++dy ) {
-                        for ( int dz = -1; dz <= 1; ++dz ) {
-                            Verlet** otherCell = &collision_grid[( ( z + dz ) + ( y + dy ) * DIM +
-                                                                   ( x + dx ) * DIM * DIM ) *
-                                                                 CELL_MAX];
-
-                            if ( !otherCell[0] ) {
-                                continue;
-                            }
-                            VerletCollision( currentCell, otherCell );
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void VerletManager::GridCollisionThread( int ThreadId ) {
-    unsigned start = 1 + ThreadId * ( ( DIM ) / THREAD_COUNT );
-    unsigned end = 1 + ( ThreadId + 1 ) * ( ( DIM ) / THREAD_COUNT );
-
-    if ( ThreadId == THREAD_COUNT - 1 ) {
-        end += DIM % THREAD_COUNT - 2;
-    }
-
-    for ( unsigned x = start; x < end; ++x ) {
-        for ( unsigned y = 1; y < DIM - 1; ++y ) {
-            for ( unsigned z = 1; z < DIM - 1; ++z ) {
-                Verlet** currentCell = &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
-
-                if ( !currentCell[0] ) {
-                    continue;
-                }
-
-                for ( int dx = -1; dx <= 1; ++dx ) {
-                    for ( int dy = -1; dy <= 1; ++dy ) {
-                        for ( int dz = -1; dz <= 1; ++dz ) {
-                            Verlet** otherCell = &collision_grid[( ( z + dz ) + ( y + dy ) * DIM +
-                                                                   ( x + dx ) * DIM * DIM ) *
-                                                                 CELL_MAX];
-
-                            if ( !otherCell[0] ) {
-                                continue;
-                            }
-                            VerletCollision( currentCell, otherCell );
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void VerletManager::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) {
-    for ( int a = 0; CurrentCell[a]; ++a ) {
-        for ( int b = 0; OtherCell[b]; ++b ) {
-            Verlet* v1 = CurrentCell[a];
-            Verlet* v2 = OtherCell[b];
-
-            if ( v1 != v2 ) {
-                vec4 axis( 0.f );
-                axis = vec_sub( v1->position, v2->position );
-                float dist = vec_length( axis );
-                if ( dist < verlet_radius + verlet_radius ) {
-                    vec4 norm( 0.f );
-                    norm = vec_divide_f( axis, dist );
-
-                    float delta = verlet_radius + verlet_radius - dist;
-                    norm = vec_mul_f( norm, 0.5f * delta );
-                    v1->position = vec_add( v1->position, norm );
-                    v2->position = vec_sub( v2->position, norm );
-                }
-            }
+            float delta = verlet_radius + verlet_radius - dist;
+            norm = vec_mul_f( norm, 0.5f * delta );
+            Verlet1->position = vec_add( Verlet1->position, norm );
+            Verlet2->position = vec_sub( Verlet2->position, norm );
         }
     }
 }
@@ -389,35 +324,6 @@ void VerletManager::DrawVerlets() {
     glBindVertexArray( 0 );
 
     Graphics::Instance().DrawNormal( container.model, container.matrix );
-}
-
-void VerletManager::ClearGrid() {
-    collision_grid.fill( nullptr );
-}
-
-void VerletManager::FillGrid() {
-    for ( unsigned i = 0; i < curr_count; ++i ) {
-        Verlet* verlet = verlet_list[i].get();
-        int x = static_cast< int >( verlet->position[0] / ( verlet_radius * 2 ) + DIM / 2 );
-        int y = static_cast< int >( verlet->position[1] / ( verlet_radius * 2 ) + DIM / 2 );
-        int z = static_cast< int >( verlet->position[2] / ( verlet_radius * 2 ) + DIM / 2 );
-
-        x = glm::clamp< int >( x, 0, DIM - 1 );
-        y = glm::clamp< int >( y, 0, DIM - 1 );
-        z = glm::clamp< int >( z, 0, DIM - 1 );
-
-        InsertNode( x, y, z, verlet );
-    }
-}
-
-void VerletManager::InsertNode( int x, int y, int z, Verlet* obj ) {
-    Verlet** currentCell = &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
-
-    int i = 0;
-    while ( currentCell[i] ) {
-        i += 1;
-    }
-    collision_grid[i + ( z + y * DIM + x * DIM * DIM ) * CELL_MAX] = obj;
 }
 
 unsigned VerletManager::GetCurrCount() const {
