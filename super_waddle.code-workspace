@@ -96,7 +96,8 @@
             "xtree": "cpp",
             "unordered_set": "cpp",
             "*.inc": "cpp",
-            "regex": "cpp"
+            "regex": "cpp",
+            "cwctype": "cpp"
         }
     }
 }

@@ -20,8 +20,15 @@
 #include "graphics.hpp"
 #include "editor.hpp"
 #include "octree.hpp"
+#include "timer.hpp"
 
 void VerletManager::CreateVerlets( ContainerShape CShape ) {
+    THREAD_COUNT = std::thread::hardware_concurrency();
+    Trace::Message( fmt::format( "Thread count: {}", std::thread::hardware_concurrency() ), FILENAME, LINENUMBER );
+    for ( int i = 0; i < THREAD_COUNT; ++i ) {
+        threads.emplace_back();
+    }
+
     projection = Graphics::Instance().GetProjection();
 
     Graphics::Instance().AddRenderCallback( std::bind( &VerletManager::DrawVerlets, this ) );
@@ -152,6 +159,7 @@ void VerletManager::ToggleForce() {
     toggle_timer = 0.f;
 }
 
+static Timer timer;
 void VerletManager::Update() {
     add_timer += Engine::Instance().GetDeltaTime();
     toggle_timer += Engine::Instance().GetDeltaTime();
@@ -161,7 +169,13 @@ void VerletManager::Update() {
     }
 
     CollisionUpdate();
-    PositionUpdate();
+
+    for ( int i = 0; i < THREAD_COUNT; ++i ) {
+        threads[i] = std::thread( &VerletManager::PositionUpdateThread, this, i );
+    }
+    for ( std::thread& thd : threads ) {
+        thd.join();
+    }
 }
 
 void VerletManager::CollisionUpdate() {
@@ -232,6 +246,49 @@ void VerletManager::ContainerCollision() {
 
     default:
         break;
+    }
+}
+
+void VerletManager::PositionUpdateThread( int ThreadId ) {
+    unsigned start = ThreadId * ( curr_count / THREAD_COUNT );
+    unsigned end = ( ThreadId + 1 ) * ( curr_count / THREAD_COUNT );
+
+    if ( ThreadId == THREAD_COUNT - 1 ) {
+        end = curr_count;
+    }
+
+    for ( unsigned i = start; i < end; ++i ) {
+        Verlet* verlet = verlet_list[i].get();
+
+        if ( force_toggle ) {
+            vec4 disp( 0.f );
+            disp = vec_sub( verlet->position, force_position );
+            float dist = vec_length( disp );
+
+            if ( dist > 0 ) {
+                vec4 norm( 0.f );
+                norm = vec_divide_f( disp, dist );
+                norm = vec_mul_f( norm, -30.f );
+                verlet->acceleration = vec_add( verlet->acceleration, norm );
+            }
+        }
+
+        verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
+
+        vec4 temp( verlet->position[0], verlet->position[1], verlet->position[2], 0.f );
+        vec4 disp( 0.f );
+        disp = vec_sub( verlet->position, verlet->old_position );
+        vec_set( verlet->old_position, verlet->position );
+
+        vec4 forceReduction( 0.f );
+        forceReduction = vec_mul_f( disp, vel_damping );
+        verlet->acceleration = vec_sub( verlet->acceleration, forceReduction );
+
+        verlet->acceleration = vec_mul_f( verlet->acceleration, dt * dt );
+        verlet->position = vec_add( verlet->position, disp );
+        verlet->position = vec_add( verlet->position, verlet->acceleration );
+
+        vec_zero( verlet->acceleration );
     }
 }
 

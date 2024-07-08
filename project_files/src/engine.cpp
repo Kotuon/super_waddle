@@ -45,8 +45,6 @@ bool Engine::Initialize() {
     time = 0.f;
     is_running = true;
 
-    Trace::Message( "Engine initialize successful.", FILENAME, LINENUMBER );
-
     return true;
 }
 

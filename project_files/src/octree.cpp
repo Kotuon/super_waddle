@@ -6,6 +6,13 @@
 #include "octree.hpp"
 #include "math.hpp"
 
+Octree::Octree() {
+    THREAD_COUNT = std::thread::hardware_concurrency();
+    for ( int i = 0; i < THREAD_COUNT; ++i ) {
+        threads.emplace_back();
+    }
+}
+
 void Octree::FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets, float Radius, unsigned CurrCount ) {
     for ( unsigned i = 0; i < CurrCount; ++i ) {
         Verlet* verlet = Verlets[i].get();

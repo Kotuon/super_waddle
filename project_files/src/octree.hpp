@@ -16,6 +16,8 @@
 
 class Octree {
 public:
+    Octree();
+
     template < typename TCallback >
     inline void SetVerletCollisionCallback( TCallback&& Callback ) {
         verlet_collision_callback = Callback;
@@ -38,11 +40,11 @@ private:
 
     static constexpr int DIM = 58;
     static constexpr int CELL_MAX = 4;
-    static constexpr unsigned THREAD_COUNT = 24;
 
     std::function< void( Verlet*, Verlet* ) > verlet_collision_callback;
 
-    std::array< std::thread, THREAD_COUNT > threads;
+    int THREAD_COUNT = 24;
+    std::vector< std::thread > threads;
 
     std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
 };

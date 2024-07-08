@@ -7,6 +7,8 @@
 #include <array>
 #include <memory>
 #include <queue>
+#include <thread>
+#include <vector>
 
 // System includes
 #include <glm/glm.hpp>
@@ -43,6 +45,7 @@ public:
     void Update();
     void CollisionUpdate();
     void PositionUpdate();
+    void PositionUpdateThread( int ThreadId );
 
     void DrawVerlets();
 
@@ -57,16 +60,12 @@ public:
 
     void DisplayMenu();
 
-    static constexpr unsigned MAX = 40000;
+    static constexpr unsigned MAX = 80000;
 
 private:
     void SetupVerletPosition( Verlet* verlet, int i );
     void SetupVerlets();
     void SetupContainer( ContainerShape CShape );
-
-    // void GridCollision();
-    // void GridCollisionThread( int ThreadId );
-    // void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell );
 
     void CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 );
 
@@ -83,6 +82,9 @@ private:
 
     vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
     vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
+
+    int THREAD_COUNT = 24;
+    std::vector< std::thread > threads;
 
     std::unique_ptr< Octree > octree;
 
