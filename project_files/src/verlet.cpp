@@ -20,6 +20,7 @@
 #include "graphics.hpp"
 #include "editor.hpp"
 #include "octree.hpp"
+#include "kdtree.hpp"
 #include "timer.hpp"
 
 void VerletManager::CreateVerlets( ContainerShape CShape ) {
@@ -159,7 +160,27 @@ void VerletManager::ToggleForce() {
     toggle_timer = 0.f;
 }
 
-static Timer timer;
+void VerletManager::CheckCollisionsWithKDTree( int ThreadId ) {
+    unsigned start = ThreadId * ( curr_count / THREAD_COUNT );
+    unsigned end = ( ThreadId + 1 ) * ( curr_count / THREAD_COUNT );
+
+    if ( ThreadId == THREAD_COUNT - 1 ) {
+        end = curr_count;
+    }
+
+    for ( unsigned i = start; i < end; ++i ) {
+        auto possibleCollisions = kdtree->SphereSearchTree( verlet_list[i]->position, verlet_radius * 4.f );
+        for ( unsigned j = 0; j < possibleCollisions.size(); ++j ) {
+            unsigned id = possibleCollisions[j];
+            if ( id == i ) {
+                continue;
+            }
+
+            CheckCollisionBetweenVerlets( verlet_list[i].get(), verlet_list[id].get() );
+        }
+    }
+}
+
 void VerletManager::Update() {
     add_timer += Engine::Instance().GetDeltaTime();
     toggle_timer += Engine::Instance().GetDeltaTime();

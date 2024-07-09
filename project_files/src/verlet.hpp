@@ -16,6 +16,7 @@
 // Local includes
 #include "math.hpp"
 
+class KDTree;
 class Octree;
 class Model;
 
@@ -69,6 +70,8 @@ private:
 
     void CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 );
 
+    void CheckCollisionsWithKDTree( int ThreadId );
+
     void ContainerCollision();
 
     std::array< std::unique_ptr< Verlet >, MAX > verlet_list{ nullptr };
@@ -86,6 +89,7 @@ private:
     int THREAD_COUNT = 24;
     std::vector< std::thread > threads;
 
+    std::unique_ptr< KDTree > kdtree;
     std::unique_ptr< Octree > octree;
 
     float vel_damping = 20.f;
