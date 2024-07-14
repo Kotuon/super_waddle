@@ -6,12 +6,12 @@
 #include <xmmintrin.h>
 
 struct vec4 {
-    vec4( float Value );
-    vec4( float X, float Y, float Z, float W );
+    vec4( float Value ) noexcept;
+    vec4( float X, float Y, float Z, float W ) noexcept;
 
-    float& operator[]( int i );
-    float operator[]( int i ) const;
-    bool operator==( const vec4& rhs ) const;
+    float& operator[]( int i ) noexcept;
+    float operator[]( int i ) const noexcept;
+    bool operator==( const vec4& rhs ) const noexcept;
 
 #if defined( _MSC_VER )
 #pragma warning( push, 3 )
@@ -32,7 +32,7 @@ struct vec4 {
 #endif
 };
 
-inline vec4 vec_set( vec4& vec0, const vec4& vec1 ) {
+inline vec4 vec_set( vec4& vec0, const vec4& vec1 ) noexcept {
     vec0[0] = vec1[0];
     vec0[1] = vec1[1];
     vec0[2] = vec1[2];
@@ -41,7 +41,7 @@ inline vec4 vec_set( vec4& vec0, const vec4& vec1 ) {
     return vec0;
 }
 
-inline vec4 vec_set_f( vec4& vec, const float x, const float y, const float z ) {
+inline vec4 vec_set_f( vec4& vec, const float x, const float y, const float z ) noexcept {
     vec[0] = x;
     vec[1] = y;
     vec[2] = z;
@@ -50,7 +50,7 @@ inline vec4 vec_set_f( vec4& vec, const float x, const float y, const float z ) 
     return vec;
 }
 
-inline vec4 vec_zero( vec4& vec ) {
+inline vec4 vec_zero( vec4& vec ) noexcept {
     vec[0] = 0.f;
     vec[1] = 0.f;
     vec[2] = 0.f;
@@ -59,7 +59,7 @@ inline vec4 vec_zero( vec4& vec ) {
     return vec;
 }
 
-inline vec4 vec_add( const vec4& vec0, const vec4& vec1 ) {
+inline vec4 vec_add( const vec4& vec0, const vec4& vec1 ) noexcept {
     vec4 result( 0.f );
 
     __m128 v0 = _mm_load_ps( vec0.a );
@@ -71,7 +71,7 @@ inline vec4 vec_add( const vec4& vec0, const vec4& vec1 ) {
     return result;
 }
 
-inline vec4 vec_sub( vec4& vec0, vec4& vec1 ) {
+inline vec4 vec_sub( vec4& vec0, vec4& vec1 ) noexcept {
     vec4 result( 0.f );
 
     __m128 v0 = _mm_load_ps( vec0.a );
@@ -83,7 +83,7 @@ inline vec4 vec_sub( vec4& vec0, vec4& vec1 ) {
     return result;
 }
 
-inline vec4 vec_mul_f( const vec4& vec, const float f ) {
+inline vec4 vec_mul_f( const vec4& vec, const float f ) noexcept {
     vec4 result( 0.f );
 
     __m128 v0 = _mm_load_ps( vec.a );
@@ -96,7 +96,7 @@ inline vec4 vec_mul_f( const vec4& vec, const float f ) {
     return result;
 }
 
-inline vec4 vec_divide_f( const vec4& vec, const float f ) {
+inline vec4 vec_divide_f( const vec4& vec, const float f ) noexcept {
     vec4 result( 0.f );
 
     __m128 v0 = _mm_load_ps( vec.a );
@@ -109,7 +109,7 @@ inline vec4 vec_divide_f( const vec4& vec, const float f ) {
     return result;
 }
 
-inline float vec_length_squared( const vec4& vec ) {
+inline float vec_length_squared( const vec4& vec ) noexcept {
     float result = 0.f;
 
     __m128 v0 = _mm_load_ps( vec.a );
@@ -123,7 +123,7 @@ inline float vec_length_squared( const vec4& vec ) {
     return result;
 }
 
-inline float vec_length( const vec4& vec ) {
+inline float vec_length( const vec4& vec ) noexcept {
     float result = 0.f;
 
     __m128 v0 = _mm_load_ps( vec.a );
@@ -139,7 +139,7 @@ inline float vec_length( const vec4& vec ) {
     return result;
 }
 
-inline float vec_distance_squared( const vec4& vec0, const vec4& vec1 ) {
+inline float vec_distance_squared( const vec4& vec0, const vec4& vec1 ) noexcept {
     float result = 0.f;
 
     __m128 v0 = _mm_load_ps( vec0.a );
@@ -156,7 +156,7 @@ inline float vec_distance_squared( const vec4& vec0, const vec4& vec1 ) {
     return result;
 }
 
-inline float vec_distance( const vec4& vec0, const vec4& vec1 ) {
+inline float vec_distance( const vec4& vec0, const vec4& vec1 ) noexcept {
     float result = 0.f;
 
     __m128 v0 = _mm_load_ps( vec0.a );

@@ -19,16 +19,16 @@ Engine::Engine() {
 
 bool Engine::Initialize() {
     if ( !Graphics::Instance().Initialize() ) {
-        Trace::Message( "Graphics falied to initialize.", FILENAME, LINENUMBER );
+        Trace::Message( "Graphics falied to initialize." );
         return false;
     }
 
     if ( !Camera::Instance().Initialize( glm::vec3( 0.f, 5.f, 20.f ) ) ) {
-        Trace::Message( "Camera falied to initialize.", FILENAME, LINENUMBER );
+        Trace::Message( "Camera falied to initialize." );
     }
 
     if ( !Editor::Instance().Initialize() ) {
-        Trace::Message( "Editor failed to initialize.", FILENAME, LINENUMBER );
+        Trace::Message( "Editor failed to initialize." );
     }
 
     ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",

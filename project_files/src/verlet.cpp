@@ -25,7 +25,7 @@
 
 void VerletManager::CreateVerlets( ContainerShape CShape ) {
     THREAD_COUNT = std::thread::hardware_concurrency();
-    Trace::Message( fmt::format( "Thread count: {}", std::thread::hardware_concurrency() ), FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "Thread count: {}", std::thread::hardware_concurrency() ) );
     for ( int i = 0; i < THREAD_COUNT; ++i ) {
         threads.emplace_back();
     }
@@ -138,13 +138,11 @@ void VerletManager::ApplyForce() {
     for ( unsigned i = 0; i < curr_count; ++i ) {
         Verlet* verlet = verlet_list[i].get();
 
-        vec4 disp( 0.f );
-        disp = vec_sub( verlet->position, force_position );
+        vec4 disp = vec_sub( verlet->position, force_position );
         float dist = vec_length( disp );
 
         if ( dist > 0 ) {
-            vec4 norm( 0.f );
-            norm = vec_divide_f( disp, dist );
+            vec4 norm = vec_divide_f( disp, dist );
             norm = vec_mul_f( norm, -30.f );
             verlet->acceleration = vec_add( verlet->acceleration, norm );
         }
@@ -181,6 +179,7 @@ void VerletManager::CheckCollisionsWithKDTree( int ThreadId ) {
     }
 }
 
+static Timer timer;
 void VerletManager::Update() {
     add_timer += Engine::Instance().GetDeltaTime();
     toggle_timer += Engine::Instance().GetDeltaTime();
@@ -209,12 +208,10 @@ void VerletManager::Update() {
 
 void VerletManager::CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 ) {
     if ( Verlet1 != Verlet2 ) {
-        vec4 axis( 0.f );
-        axis = vec_sub( Verlet1->position, Verlet2->position );
+        vec4 axis = vec_sub( Verlet1->position, Verlet2->position );
         float dist = vec_length( axis );
         if ( dist < verlet_radius + verlet_radius ) {
-            vec4 norm( 0.f );
-            norm = vec_divide_f( axis, dist );
+            vec4 norm = vec_divide_f( axis, dist );
 
             float delta = verlet_radius + verlet_radius - dist;
             norm = vec_mul_f( norm, 0.5f * delta );
@@ -234,8 +231,7 @@ void VerletManager::ContainerCollision() {
             float dist = vec_length( disp );
 
             if ( dist > ( container.collision_radius - verlet_radius ) ) {
-                vec4 norm( 0.f );
-                norm = vec_divide_f( disp, dist );
+                vec4 norm = vec_divide_f( disp, dist );
                 norm = vec_mul_f( norm, container.collision_radius - verlet_radius );
                 vec_set( v->position, norm );
             }
@@ -266,7 +262,7 @@ void VerletManager::ContainerCollision() {
     }
 }
 
-void VerletManager::PositionUpdateThread( int ThreadId ) {
+void VerletManager::PositionUpdateThread( int ThreadId ) noexcept {
     unsigned start = ThreadId * ( curr_count / THREAD_COUNT );
     unsigned end = ( ThreadId + 1 ) * ( curr_count / THREAD_COUNT );
 
@@ -278,13 +274,11 @@ void VerletManager::PositionUpdateThread( int ThreadId ) {
         Verlet* verlet = verlet_list[i].get();
 
         if ( force_toggle ) {
-            vec4 disp( 0.f );
-            disp = vec_sub( verlet->position, force_position );
+            vec4 disp = vec_sub( verlet->position, force_position );
             float dist = vec_length( disp );
 
             if ( dist > 0 ) {
-                vec4 norm( 0.f );
-                norm = vec_divide_f( disp, dist );
+                vec4 norm = vec_divide_f( disp, dist );
                 norm = vec_mul_f( norm, -30.f );
                 verlet->acceleration = vec_add( verlet->acceleration, norm );
             }
@@ -292,13 +286,11 @@ void VerletManager::PositionUpdateThread( int ThreadId ) {
 
         verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
 
-        vec4 temp( verlet->position[0], verlet->position[1], verlet->position[2], 0.f );
-        vec4 disp( 0.f );
-        disp = vec_sub( verlet->position, verlet->old_position );
+        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z, 0.f );
+        vec4 disp = vec_sub( verlet->position, verlet->old_position );
         vec_set( verlet->old_position, verlet->position );
 
-        vec4 forceReduction( 0.f );
-        forceReduction = vec_mul_f( disp, vel_damping );
+        vec4 forceReduction = vec_mul_f( disp, vel_damping );
         verlet->acceleration = vec_sub( verlet->acceleration, forceReduction );
 
         verlet->acceleration = vec_mul_f( verlet->acceleration, dt * dt );
@@ -309,18 +301,16 @@ void VerletManager::PositionUpdateThread( int ThreadId ) {
     }
 }
 
-void VerletManager::PositionUpdate() {
+void VerletManager::PositionUpdate() noexcept {
     for ( unsigned i = 0; i < curr_count; ++i ) {
         Verlet* verlet = verlet_list[i].get();
 
         if ( force_toggle ) {
-            vec4 disp( 0.f );
-            disp = vec_sub( verlet->position, force_position );
+            vec4 disp = vec_sub( verlet->position, force_position );
             float dist = vec_length( disp );
 
             if ( dist > 0 ) {
-                vec4 norm( 0.f );
-                norm = vec_divide_f( disp, dist );
+                vec4 norm = vec_divide_f( disp, dist );
                 norm = vec_mul_f( norm, -30.f );
                 verlet->acceleration = vec_add( verlet->acceleration, norm );
             }
@@ -328,13 +318,11 @@ void VerletManager::PositionUpdate() {
 
         verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
 
-        vec4 temp( verlet->position[0], verlet->position[1], verlet->position[2], 0.f );
-        vec4 disp( 0.f );
-        disp = vec_sub( verlet->position, verlet->old_position );
+        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z, 0.f );
+        vec4 disp = vec_sub( verlet->position, verlet->old_position );
         vec_set( verlet->old_position, verlet->position );
 
-        vec4 forceReduction( 0.f );
-        forceReduction = vec_mul_f( disp, vel_damping );
+        vec4 forceReduction = vec_mul_f( disp, vel_damping );
         verlet->acceleration = vec_sub( verlet->acceleration, forceReduction );
 
         verlet->acceleration = vec_mul_f( verlet->acceleration, dt * dt );
@@ -429,7 +417,7 @@ void VerletManager::DisplayMenu() {
     ImGui::Separator();
 
     ImGui::SliderFloat3( "Gravity position", grav_vec.a, -5.f, 5.f );
-    ImGui::SliderFloat( "Velocity damping", &vel_damping, 0.f, 100.f );
+    ImGui::SliderFloat( "Velocity damping", &vel_damping, 0.f, 1000.f );
 
     ImGui::SeparatorText( "Container shape" );
 

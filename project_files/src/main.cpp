@@ -20,7 +20,7 @@ int main( int, char*[] ) {
 
     char dir[256];
     GetModuleFileName( nullptr, dir, 256 );
-    Trace::Message( fmt::format( "{}", dir ), FILENAME, LINENUMBER );
+    Trace::Message( fmt::format( "{}", dir ) );
 
     // Initialize application
     bool result = Engine::Instance().Initialize();
