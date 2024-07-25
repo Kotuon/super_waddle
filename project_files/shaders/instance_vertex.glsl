@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 vertexPos;
 layout (location = 1) in vec3 vertexNormal;
 layout (location = 2) in vec2 vertexTexCoord;
-layout (location = 3) in vec3 instancePosition;
+layout (location = 3) in vec4 instancePosition;
 layout (location = 4) in float instanceVelocity;
 
 uniform float scale;
@@ -25,7 +25,7 @@ mat4 translationMatrix(vec3 translation)
 
 void main()
 {
-    mat4 model = translationMatrix(instancePosition);
+    mat4 model = translationMatrix(instancePosition.xyz);
     fragmentPos = vec3(model * vec4(vertexPos, 1.0));
     fragmentVertexNormal = mat3(transpose(inverse(model))) * vertexNormal;
     fragmentVelocity = instanceVelocity;

@@ -1,6 +1,6 @@
 
-#ifndef MATH_HPP
-#define MATH_HPP
+#ifndef VEC_HPP
+#define VEC_HPP
 #pragma once
 
 #include <xmmintrin.h>

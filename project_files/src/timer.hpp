@@ -17,11 +17,16 @@ struct Timer {
 
     template < typename TCallback >
     void Run( std::string message, TCallback&& Callback ) {
-        Start();
+        std::chrono::time_point< std::chrono::steady_clock > rstart;
+        std::chrono::time_point< std::chrono::steady_clock > rend;
+        std::chrono::duration< double, std::micro > rduration;
 
+        rstart = std::chrono::steady_clock::now();
         Callback();
+        rend = std::chrono::steady_clock::now();
 
-        End( message );
+        rduration = rend - rstart;
+        Trace::Message( fmt::format( "{}: {}", message, rduration.count() ) );
     }
 
     void Start() {

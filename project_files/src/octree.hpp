@@ -5,14 +5,16 @@
 
 // std includes
 #include <array>
+#include <atomic>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <thread>
 
 // Local includes
 #include "verlet.hpp"
-
-// typedef std::array< std::unique_ptr< Verlet >, VerletManager::MAX > VerletArray;
+#include "float_math.hpp"
 
 class Octree {
 public:
@@ -23,33 +25,38 @@ public:
         verlet_collision_callback = Callback;
     }
 
-    void FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets,
+    void FillTree( const std::array< float, VerletManager::MAX * fvec::VEC4_SIZE >& Pos,
                    const float Radius, const unsigned CurrCount ) noexcept;
     inline void ClearTree() {
         collision_grid.fill( nullptr );
     }
 
-    inline Verlet** GetNode( int x, int y, int z ) {
+    inline unsigned** GetNode( const int x, const int y, const int z ) noexcept {
         return &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
     }
 
     void CheckCollisions() noexcept;
 
-    void GridCollisionThread( int ThreadId ) noexcept;
-    inline void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) noexcept;
+    void GridCollisionThread( const unsigned ThreadId ) noexcept;
+    inline void VerletCollision( unsigned** CurrentCell, unsigned** OtherCell ) noexcept;
 
 private:
-    inline void InsertNode( int x, int y, int z, Verlet* obj ) noexcept;
+    inline void InsertNode( const int x, const int y, const int z, unsigned* obj ) noexcept;
 
-    static constexpr int DIM = 58;
+    std::atomic< unsigned > counter = 0;
+    std::mutex m;
+    std::condition_variable cv;
+
+    static constexpr int DIM = 49;
     static constexpr int CELL_MAX = 4;
 
-    std::function< void( Verlet*, Verlet* ) > verlet_collision_callback;
+    std::function< void( unsigned*, unsigned* ) > verlet_collision_callback;
 
-    int THREAD_COUNT = 24;
+    unsigned THREAD_COUNT = 4;
     std::vector< std::thread > threads;
+    std::vector< unsigned > ids;
 
-    std::array< Verlet*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
+    std::array< unsigned*, DIM * DIM * DIM * CELL_MAX > collision_grid{ nullptr };
 };
 
 #endif

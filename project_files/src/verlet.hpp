@@ -14,7 +14,7 @@
 #include <glm/glm.hpp>
 
 // Local includes
-#include "math.hpp"
+#include "float_math.hpp"
 
 class KDTree;
 class Octree;
@@ -33,20 +33,14 @@ struct Container {
     ContainerShape shape;
 };
 
-struct Verlet {
-    vec4 position{ 0.f };
-    vec4 old_position{ 0.f };
-    vec4 acceleration{ 0.f };
-};
-
 struct VerletManager {
 public:
-    void CreateVerlets( ContainerShape CShape );
+    void CreateVerlets( const ContainerShape CShape );
 
     void Update();
     void CollisionUpdate();
     void PositionUpdate() noexcept;
-    void PositionUpdateThread( int ThreadId ) noexcept;
+    void PositionUpdateThread( const int ThreadId ) noexcept;
 
     void DrawVerlets();
 
@@ -64,18 +58,18 @@ public:
     static constexpr unsigned MAX = 80000;
 
 private:
-    void SetupVerletPosition( Verlet* verlet, int i );
+    void SetupVerletPosition( const unsigned i );
     void SetupVerlets();
-    void SetupContainer( ContainerShape CShape );
+    void SetupContainer( const ContainerShape CShape );
 
-    void CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 );
-
-    void CheckCollisionsWithKDTree( int ThreadId );
+    void CheckCollisionBetweenVerlets( const unsigned* Verlet1, const unsigned* Verlet2 ) noexcept;
 
     void ContainerCollision();
+    inline void SphereCollision( const unsigned* verlet ) noexcept;
 
-    std::array< std::unique_ptr< Verlet >, MAX > verlet_list{ nullptr };
-    std::array< float, MAX * 3 > positions{ 0.f };
+    std::array< float, MAX * fvec::VEC4_SIZE > f_pos{ 0.f };
+    std::array< float, MAX * fvec::VEC4_SIZE > f_oldpos{ 0.f };
+    std::array< float, MAX * fvec::VEC4_SIZE > f_accel{ 0.f };
     std::array< float, MAX > velocities{ 0.f };
 
     glm::mat4 projection;
@@ -83,22 +77,22 @@ private:
     Model* model;
     Container container;
 
-    vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
-    vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
+    float force_position[fvec::VEC4_SIZE]{ 0.f, 4.f, 0.f, 0.f };
+    float grav_vec[fvec::VEC4_SIZE]{ 0.f, -4.5f, 0.f, 0.f };
 
     int THREAD_COUNT = 24;
     std::vector< std::thread > threads;
 
-    std::unique_ptr< KDTree > kdtree;
     std::unique_ptr< Octree > octree;
 
     float vel_damping = 20.f;
 
     float verlet_radius = 0.15f;
+    float verlet_diameter = verlet_radius * 2.f;
 
     float dt;
 
-    float add_timer = 0.25f;
+    float add_timer = 0.05f;
     float add_cooldown = 0.1f;
 
     float toggle_timer = 0.25f;

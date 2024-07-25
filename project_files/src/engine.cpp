@@ -12,7 +12,7 @@
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
 #include "verlet.hpp"
-#include "editor.hpp"
+// #include "editor.hpp"
 
 Engine::Engine() {
 }
@@ -27,9 +27,9 @@ bool Engine::Initialize() {
         Trace::Message( "Camera falied to initialize." );
     }
 
-    if ( !Editor::Instance().Initialize() ) {
-        Trace::Message( "Editor failed to initialize." );
-    }
+    // if ( !Editor::Instance().Initialize() ) {
+    //     Trace::Message( "Editor failed to initialize." );
+    // }
 
     ShaderManager::Instance().GetShader( "shaders/phong_vertex.glsl",
                                          "shaders/phong_fragment.glsl" );

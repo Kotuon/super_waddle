@@ -3,7 +3,7 @@
 #include <cassert>
 
 // Local includes
-#include "math.hpp"
+#include "vec.hpp"
 
 vec4::vec4( float Value ) noexcept : x( Value ), y( Value ), z( Value ), w( Value ) {
 }
