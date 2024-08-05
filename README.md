@@ -1,7 +1,7 @@
 # Super Waddle
 [![Watch the video](https://raw.githubusercontent.com/kotuon/super_waddle/main/verletintegration.png)](https://raw.githubusercontent.com/kotuon/super_waddle/main/verletintegration_video_small.mp4)
 
-![]()
+![](https://github.com/Kotuon/super_waddle/blob/main/verletintegration_gif.gif)
 
 ## Table of Contents
 * [Introduction](#introduction)
