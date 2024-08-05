@@ -9,6 +9,7 @@
 // std includes //
 #include <string>
 #include <fstream>
+#include <source_location>
 
 /*! Trace class */
 class Trace {
@@ -17,11 +18,11 @@ public:
      * @brief Prints a message into the output file
      *
      * @param message Message to be printed
-     * @param filename Should always be FILENAME
-     * @param linenumber Should always be LINENUMBER
+     * @param src Source location information
      * @return void
      */
-    static void Message( std::string message, std::string filename, int linenumber );
+    static void Message( std::string message,
+                         std::source_location src = std::source_location::current() );
 
     /**
      * @brief Destroy the Trace:: Trace object

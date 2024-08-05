@@ -13,13 +13,14 @@ Octree::Octree() {
     }
 }
 
-void Octree::FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets, float Radius, unsigned CurrCount ) {
+void Octree::FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets,
+                       float Radius, unsigned CurrCount ) noexcept {
     for ( unsigned i = 0; i < CurrCount; ++i ) {
         Verlet* verlet = Verlets[i].get();
 
-        int x = static_cast< int >( verlet->position[0] / ( Radius * 2 ) + DIM / 2 );
-        int y = static_cast< int >( verlet->position[1] / ( Radius * 2 ) + DIM / 2 );
-        int z = static_cast< int >( verlet->position[2] / ( Radius * 2 ) + DIM / 2 );
+        int x = static_cast< int >( verlet->position.x / ( Radius * 2 ) + DIM / 2 );
+        int y = static_cast< int >( verlet->position.y / ( Radius * 2 ) + DIM / 2 );
+        int z = static_cast< int >( verlet->position.z / ( Radius * 2 ) + DIM / 2 );
 
         x = std::clamp< int >( x, 0, DIM - 1 );
         y = std::clamp< int >( y, 0, DIM - 1 );
@@ -29,21 +30,15 @@ void Octree::FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX
     }
 }
 
-void Octree::ClearTree() {
-    collision_grid.fill( nullptr );
-}
-
-void Octree::InsertNode( int x, int y, int z, Verlet* obj ) {
-    Verlet** currentCell = &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
-
-    int i = 0;
-    while ( currentCell[i] ) {
-        i += 1;
+void Octree::InsertNode( int x, int y, int z, Verlet* obj ) noexcept {
+    int index = ( z + y * DIM + x * DIM * DIM ) * CELL_MAX;
+    while ( collision_grid[index] ) {
+        index = ( index + 1 ) % ( DIM * DIM * DIM * CELL_MAX );
     }
-    collision_grid[i + ( z + y * DIM + x * DIM * DIM ) * CELL_MAX] = obj;
+    collision_grid[index] = obj;
 }
 
-void Octree::CheckCollisions() {
+void Octree::CheckCollisions() noexcept {
     for ( int i = 0; i < THREAD_COUNT; ++i ) {
         threads[i] = std::thread( &Octree::GridCollisionThread, this, i );
     }
@@ -52,7 +47,7 @@ void Octree::CheckCollisions() {
     }
 }
 
-void Octree::GridCollisionThread( int ThreadId ) {
+void Octree::GridCollisionThread( int ThreadId ) noexcept {
     unsigned start = 1 + ThreadId * ( ( DIM ) / THREAD_COUNT );
     unsigned end = 1 + ( ThreadId + 1 ) * ( ( DIM ) / THREAD_COUNT );
 
@@ -86,7 +81,7 @@ void Octree::GridCollisionThread( int ThreadId ) {
     }
 }
 
-void Octree::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) {
+void Octree::VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) noexcept {
     for ( int a = 0; CurrentCell[a]; ++a ) {
         for ( int b = 0; OtherCell[b]; ++b ) {
             verlet_collision_callback( CurrentCell[a], OtherCell[b] );

@@ -87,8 +87,7 @@ std::vector< float >* ModelManager::LoadObj( const std::string& ModelFileName ) 
     FILE* file;
     errno_t err = fopen_s( &file, ModelFileName.c_str(), "r" );
     if ( err != 0 ) {
-        Trace::Message( fmt::format( "Unable to open {}.", ModelFileName ),
-                        FILENAME, LINENUMBER );
+        Trace::Message( fmt::format( "Unable to open {}.", ModelFileName ) );
         return nullptr;
     }
 

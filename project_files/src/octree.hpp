@@ -19,24 +19,27 @@ public:
     Octree();
 
     template < typename TCallback >
-    inline void SetVerletCollisionCallback( TCallback&& Callback ) {
+    inline void SetVerletCollisionCallback( TCallback&& Callback ) noexcept {
         verlet_collision_callback = Callback;
     }
 
-    void FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets, const float Radius, const unsigned CurrCount );
-    void ClearTree();
+    void FillTree( std::array< std::unique_ptr< Verlet >, VerletManager::MAX >& Verlets,
+                   const float Radius, const unsigned CurrCount ) noexcept;
+    inline void ClearTree() {
+        collision_grid.fill( nullptr );
+    }
 
-    Verlet** GetNode( int x, int y, int z ) {
+    inline Verlet** GetNode( int x, int y, int z ) {
         return &collision_grid[( z + y * DIM + x * DIM * DIM ) * CELL_MAX];
     }
 
-    void CheckCollisions();
+    void CheckCollisions() noexcept;
 
-    void GridCollisionThread( int ThreadId );
-    void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell );
+    void GridCollisionThread( int ThreadId ) noexcept;
+    inline void VerletCollision( Verlet** CurrentCell, Verlet** OtherCell ) noexcept;
 
 private:
-    void InsertNode( int x, int y, int z, Verlet* obj );
+    inline void InsertNode( int x, int y, int z, Verlet* obj ) noexcept;
 
     static constexpr int DIM = 58;
     static constexpr int CELL_MAX = 4;

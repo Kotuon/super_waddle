@@ -97,7 +97,8 @@
             "unordered_set": "cpp",
             "*.inc": "cpp",
             "regex": "cpp",
-            "cwctype": "cpp"
+            "cwctype": "cpp",
+            "stacktrace": "cpp"
         }
     }
 }

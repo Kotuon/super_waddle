@@ -31,7 +31,7 @@ Graphics::Graphics() {
 
 bool Graphics::Initialize() {
     if ( !glfwInit() ) {
-        Trace::Message( "Could not start GLFW.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not start GLFW." );
         return false;
     }
 
@@ -56,7 +56,7 @@ bool Graphics::Initialize() {
 
     // Ensure the window is set up correctly
     if ( !window ) {
-        Trace::Message( "Could not open GLFW window.", FILENAME, LINENUMBER );
+        Trace::Message( "Could not open GLFW window." );
 
         glfwTerminate();
         return false;
@@ -68,17 +68,13 @@ bool Graphics::Initialize() {
 
     Trace::Message( fmt::format( "{}: {}",
                                  CastToString( glGetString( GL_VENDOR ) ),
-                                 CastToString( glGetString( GL_RENDERER ) ) ),
-                    FILENAME, LINENUMBER );
+                                 CastToString( glGetString( GL_RENDERER ) ) ) );
     Trace::Message( fmt::format( "GLFW\t {}",
-                                 glfwGetVersionString() ),
-                    FILENAME, LINENUMBER );
+                                 glfwGetVersionString() ) );
     Trace::Message( fmt::format( "OpenGL\t {}",
-                                 CastToString( glGetString( GL_VERSION ) ) ),
-                    FILENAME, LINENUMBER );
+                                 CastToString( glGetString( GL_VERSION ) ) ) );
     Trace::Message( fmt::format( "GLSL\t {}",
-                                 CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ),
-                    FILENAME, LINENUMBER );
+                                 CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ) );
 
     // Enable depth (Z) buffer (accept "closest" fragment)
     glEnable( GL_DEPTH_TEST );
@@ -181,7 +177,7 @@ void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
                           std::string( Description ) +
                           std::to_string( Error );
 
-    Trace::Message( message, FILENAME, LINENUMBER );
+    Trace::Message( message );
 }
 
 glm::mat4 Graphics::GetProjection() {

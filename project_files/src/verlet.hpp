@@ -45,8 +45,8 @@ public:
 
     void Update();
     void CollisionUpdate();
-    void PositionUpdate();
-    void PositionUpdateThread( int ThreadId );
+    void PositionUpdate() noexcept;
+    void PositionUpdateThread( int ThreadId ) noexcept;
 
     void DrawVerlets();
 
