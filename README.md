@@ -1,4 +1,4 @@
-# Super Waddle
+# Verlet Integration with C++ and OpenGL
 ![](https://github.com/Kotuon/super_waddle/blob/main/verletintegration_gif_short.gif)
 
 ## Table of Contents
