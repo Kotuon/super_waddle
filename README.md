@@ -10,7 +10,7 @@
 
 ## Introduction
 
-My projectt uses verlet integration to simulate up to 40,000 particles inside a custom engine.
+My project uses verlet integration to simulate up to 40,000 particles inside a custom engine.
 
 ## Technology Used
 * C++ 20
