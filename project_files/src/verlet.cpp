@@ -40,8 +40,9 @@ void VerletManager::CreateVerlets( ContainerShape CShape ) {
     Input::Instance().AddCallback( GLFW_KEY_G, std::bind( &VerletManager::ApplyForce, this ) );
     Input::Instance().AddCallback( GLFW_KEY_H, std::bind( &VerletManager::ToggleForce, this ) );
 
-    unsigned instance_shader = ShaderManager::Instance().GetShader( "shaders/instance_vertex.glsl",
-                                                                    "shaders/instance_fragment.glsl" );
+    unsigned instance_shader = ShaderManager::Instance().GetShader(
+        "shaders/instance_vertex.glsl",
+        "shaders/instance_fragment.glsl" );
 
     model = ModelManager::Instance().GetModel( "models/sphere.obj", instance_shader, true );
 
@@ -167,7 +168,8 @@ void VerletManager::CheckCollisionsWithKDTree( int ThreadId ) {
     }
 
     for ( unsigned i = start; i < end; ++i ) {
-        auto possibleCollisions = kdtree->SphereSearchTree( verlet_list[i]->position, verlet_radius * 4.f );
+        auto possibleCollisions = kdtree->SphereSearchTree( verlet_list[i]->position,
+                                                            verlet_radius * 4.f );
         for ( unsigned j = 0; j < possibleCollisions.size(); ++j ) {
             unsigned id = possibleCollisions[j];
             if ( id == i ) {

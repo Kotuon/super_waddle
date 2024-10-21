@@ -12,8 +12,6 @@
 // Local includes
 #include "verlet.hpp"
 
-// typedef std::array< std::unique_ptr< Verlet >, VerletManager::MAX > VerletArray;
-
 class Octree {
 public:
     Octree();
