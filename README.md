@@ -11,6 +11,7 @@
 ## Introduction
 
 My project uses verlet integration to simulate up to 40,000 particles inside a custom engine.
+
 [Check out more information on my blog](https://www.kelsonwysocki.com/post/what-i-ve-been-doing-with-c)
 
 ## Technology Used
