@@ -86,7 +86,7 @@ private:
     vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
     vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
 
-    int THREAD_COUNT = 24;
+    int THREAD_COUNT = 32;
     std::vector< std::thread > threads;
 
     std::unique_ptr< KDTree > kdtree;
