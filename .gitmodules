@@ -23,3 +23,15 @@
 [submodule "project_files/vendor/imguicolortextedit"]
 	path = project_files/vendor/imguicolortextedit
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit
+[submodule "project_files/vendor/traceSystem"]
+	path = project_files/vendor/traceSystem
+	url = https://github.com/Kotuon/traceSystem
+[submodule "project_files/vendor/crashHandler"]
+	path = project_files/vendor/crashHandler
+	url = https://github.com/Kotuon/crashHandler
+[submodule "project_files/vendor/profiler"]
+	path = project_files/vendor/profiler
+	url = https://github.com/Kotuon/profiler
+[submodule "project_files/vendor/threadPool"]
+	path = project_files/vendor/threadPool
+	url = https://github.com/Kotuon/threadPool

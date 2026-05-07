@@ -31,7 +31,7 @@ Graphics::Graphics() {
 
 bool Graphics::Initialize() {
     if ( !glfwInit() ) {
-        Trace::Message( "Could not start GLFW." );
+        Trace::message( "Could not start GLFW." );
         return false;
     }
 
@@ -56,7 +56,7 @@ bool Graphics::Initialize() {
 
     // Ensure the window is set up correctly
     if ( !window ) {
-        Trace::Message( "Could not open GLFW window." );
+        Trace::message( "Could not open GLFW window." );
 
         glfwTerminate();
         return false;
@@ -66,14 +66,14 @@ bool Graphics::Initialize() {
     glfwMakeContextCurrent( window );
     gladLoadGL();
 
-    Trace::Message( fmt::format( "{}: {}",
+    Trace::message( fmt::format( "{}: {}",
                                  CastToString( glGetString( GL_VENDOR ) ),
                                  CastToString( glGetString( GL_RENDERER ) ) ) );
-    Trace::Message( fmt::format( "GLFW\t {}",
+    Trace::message( fmt::format( "GLFW\t {}",
                                  glfwGetVersionString() ) );
-    Trace::Message( fmt::format( "OpenGL\t {}",
+    Trace::message( fmt::format( "OpenGL\t {}",
                                  CastToString( glGetString( GL_VERSION ) ) ) );
-    Trace::Message( fmt::format( "GLSL\t {}",
+    Trace::message( fmt::format( "GLSL\t {}",
                                  CastToString( glGetString( GL_SHADING_LANGUAGE_VERSION ) ) ) );
 
     // Enable depth (Z) buffer (accept "closest" fragment)
@@ -177,7 +177,7 @@ void Graphics::GLFWErrorCallback( int Error, const char* Description ) {
                           std::string( Description ) +
                           std::to_string( Error );
 
-    Trace::Message( message );
+    Trace::message( message );
 }
 
 glm::mat4 Graphics::GetProjection() {

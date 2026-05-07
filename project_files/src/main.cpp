@@ -16,11 +16,11 @@
 #include "crash_handler.hpp"
 
 int main( int, char*[] ) {
-    SetupDump();
+    setupDump();
 
     char dir[256];
     GetModuleFileName( nullptr, dir, 256 );
-    Trace::Message( fmt::format( "{}", dir ) );
+    Trace::message( fmt::format( "{}", dir ) );
 
     // Initialize application
     bool result = Engine::Instance().Initialize();

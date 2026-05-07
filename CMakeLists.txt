@@ -33,6 +33,10 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(project_files/vendor/glfw)
 add_subdirectory(project_files/vendor/fmt)
+add_subdirectory(project_files/vendor/traceSystem)
+add_subdirectory(project_files/vendor/crashHandler)
+add_subdirectory(project_files/vendor/profiler)
+add_subdirectory(project_files/vendor/threadPool)
 
 #
 # Set include paths
@@ -45,7 +49,12 @@ include_directories(project_files/src/
     project_files/vendor/fmt/include
     project_files/vendor/imgui
     project_files/vendor/imguizmo
-    project_files/vendor/imguicolortextedit)
+    project_files/vendor/imguicolortextedit
+    project_files/vendor/traceSystem/include
+    project_files/vendor/crashHandler/include
+    project_files/vendor/profiler/include
+    project_files/vendor/threadPool/include
+)
 
 #
 # Add files
@@ -69,11 +78,10 @@ file(GLOB PROJECT_CONFIGS CMakeLists.txt
     .gitignore
     .gitmodules)
 
-file (COPY project_files/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
-file (COPY project_files/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
+file(COPY project_files/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
+file(COPY project_files/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
 
-
-#add_custom_target(copy_assets COMMAND ${CMAKE_COMMAND} -E copy_directory project_files/models ${CMAKE_BINARY_DIR}/models)
+# add_custom_target(copy_assets COMMAND ${CMAKE_COMMAND} -E copy_directory project_files/models ${CMAKE_BINARY_DIR}/models)
 
 #
 # Organizing files
@@ -95,6 +103,11 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${GLFW_LIBRARIES}
     ${GLAD_LIBRARIES}
-    fmt::fmt)
+    fmt::fmt
+    traceSystem
+    crashHandler
+    profiler
+    threadPool
+)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})

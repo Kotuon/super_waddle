@@ -24,45 +24,49 @@
 #include "timer.hpp"
 
 void VerletManager::CreateVerlets( ContainerShape CShape ) {
-    THREAD_COUNT = std::thread::hardware_concurrency();
-    Trace::Message( fmt::format( "Thread count: {}", std::thread::hardware_concurrency() ) );
-    for ( int i = 0; i < THREAD_COUNT; ++i ) {
-        threads.emplace_back();
-    }
+    Stp = std::make_unique< StaticThreadPool >();
+    ThreadCount = static_cast< unsigned >( Stp->getThreadCount() );
+    Stp->initialize( &VerletManager::PositionUpdateThread, this );
 
     projection = Graphics::Instance().GetProjection();
 
-    Graphics::Instance().AddRenderCallback( std::bind( &VerletManager::DrawVerlets, this ) );
-    Engine::Instance().AddFixedUpdateCallback( std::bind( &VerletManager::Update, this ) );
-    Editor::Instance().AddDisplayMenuCallback( std::bind( &VerletManager::DisplayMenu, this ) );
+    Graphics::Instance().AddRenderCallback(
+        std::bind( &VerletManager::DrawVerlets, this ) );
+    Engine::Instance().AddFixedUpdateCallback(
+        std::bind( &VerletManager::Update, this ) );
+    Editor::Instance().AddDisplayMenuCallback(
+        std::bind( &VerletManager::DisplayMenu, this ) );
 
-    Input::Instance().AddCallback( GLFW_KEY_V, std::bind( &VerletManager::AddVerlet, this ) );
-    Input::Instance().AddCallback( GLFW_KEY_G, std::bind( &VerletManager::ApplyForce, this ) );
-    Input::Instance().AddCallback( GLFW_KEY_H, std::bind( &VerletManager::ToggleForce, this ) );
+    Input::Instance().AddCallback(
+        GLFW_KEY_V, std::bind( &VerletManager::AddVerlet, this ) );
+    Input::Instance().AddCallback(
+        GLFW_KEY_G, std::bind( &VerletManager::ApplyForce, this ) );
+    Input::Instance().AddCallback(
+        GLFW_KEY_H, std::bind( &VerletManager::ToggleForce, this ) );
 
     unsigned instance_shader = ShaderManager::Instance().GetShader(
-        "shaders/instance_vertex.glsl",
-        "shaders/instance_fragment.glsl" );
+        "shaders/instance_vertex.glsl", "shaders/instance_fragment.glsl" );
 
-    model = ModelManager::Instance().GetModel( "models/sphere.obj", instance_shader, true );
+    model = ModelManager::Instance().GetModel( "models/sphere.obj",
+                                               instance_shader, true );
 
     dt = Engine::Instance().GetFixedTimeStep();
 
     octree = std::make_unique< Octree >();
-    octree->SetVerletCollisionCallback( std::bind(
-        &VerletManager::CheckCollisionBetweenVerlets, this,
-        std::placeholders::_1, std::placeholders::_2 ) );
+    octree->SetVerletCollisionCallback(
+        std::bind( &VerletManager::CheckCollisionBetweenVerlets, this,
+                   std::placeholders::_1, std::placeholders::_2 ) );
 
     SetupContainer( CShape );
     SetupVerlets();
 }
 
 void VerletManager::SetupVerletPosition( Verlet* verlet, int i ) {
-    float x = static_cast< float >( glm::sin( i ) *
-                                    ( container.collision_radius * ( 2.f / 3.f ) ) );
+    float x = static_cast< float >(
+        glm::sin( i ) * ( container.collision_radius * ( 2.f / 3.f ) ) );
     float y = static_cast< float >( rand() % ( 2 ) + 1 );
-    float z = static_cast< float >( glm::cos( i ) *
-                                    ( container.collision_radius * ( 2.f / 3.f ) ) );
+    float z = static_cast< float >(
+        glm::cos( i ) * ( container.collision_radius * ( 2.f / 3.f ) ) );
 
     vec_set_f( verlet->position, x, y, z );
     vec_set_f( verlet->old_position, x * 0.999f, y, z * 0.999f );
@@ -82,26 +86,26 @@ void VerletManager::SetupVerlets() {
 }
 
 void VerletManager::SetupContainer( ContainerShape CShape ) {
-    unsigned cShader = ShaderManager::Instance().GetShader( "shaders/base_vertex.glsl",
-                                                            "shaders/base_fragment.glsl" );
+    unsigned cShader = ShaderManager::Instance().GetShader(
+        "shaders/base_vertex.glsl", "shaders/base_fragment.glsl" );
 
     container.shape = CShape;
     switch ( container.shape ) {
     case Sphere:
-        container.model = ModelManager::Instance().GetModel( "models/sphere.obj", GL_POINTS,
-                                                             cShader, false );
+        container.model = ModelManager::Instance().GetModel(
+            "models/sphere.obj", GL_POINTS, cShader, false );
         container.model_radius = container.collision_radius * 1.02f;
         break;
     case Cube:
-        container.model = ModelManager::Instance().GetModel( "models/cube.obj", GL_TRIANGLES,
-                                                             cShader, false );
+        container.model = ModelManager::Instance().GetModel(
+            "models/cube.obj", GL_TRIANGLES, cShader, false );
         container.model_radius = container.collision_radius * 2.f + 0.15f * 3.f;
         break;
     }
 
-    container.matrix = glm::scale( glm::mat4( 1.f ), { container.model_radius,
-                                                       container.model_radius,
-                                                       container.model_radius } );
+    container.matrix = glm::scale(
+        glm::mat4( 1.f ), { container.model_radius, container.model_radius,
+                            container.model_radius } );
 }
 
 void VerletManager::AddVerlet() {
@@ -113,7 +117,8 @@ void VerletManager::AddVerlet() {
         return;
     }
 
-    curr_count = std::clamp( curr_count + amount_to_add, static_cast< unsigned >( 0 ), MAX );
+    curr_count = std::clamp( curr_count + amount_to_add,
+                             static_cast< unsigned >( 0 ), MAX );
     add_timer = 0.f;
 }
 
@@ -123,7 +128,8 @@ void VerletManager::RemoveVerlet() {
     }
 
     unsigned lastCount = curr_count;
-    curr_count = std::clamp( curr_count - amount_to_add, static_cast< unsigned >( 0 ), MAX );
+    curr_count = std::clamp( curr_count - amount_to_add,
+                             static_cast< unsigned >( 0 ), MAX );
     add_timer = 0.f;
 
     for ( unsigned i = lastCount; i > curr_count; --i ) {
@@ -159,24 +165,25 @@ void VerletManager::ToggleForce() {
     toggle_timer = 0.f;
 }
 
-void VerletManager::CheckCollisionsWithKDTree( int ThreadId ) {
-    unsigned start = ThreadId * ( curr_count / THREAD_COUNT );
-    unsigned end = ( ThreadId + 1 ) * ( curr_count / THREAD_COUNT );
+void VerletManager::CheckCollisionsWithKDTree( unsigned ThreadId ) {
+    unsigned start = ThreadId * ( curr_count / ThreadCount );
+    unsigned end = ( ThreadId + 1 ) * ( curr_count / ThreadCount );
 
-    if ( ThreadId == THREAD_COUNT - 1 ) {
+    if ( ThreadId == ThreadCount - 1 ) {
         end = curr_count;
     }
 
     for ( unsigned i = start; i < end; ++i ) {
-        auto possibleCollisions = kdtree->SphereSearchTree( verlet_list[i]->position,
-                                                            verlet_radius * 4.f );
+        auto possibleCollisions = kdtree->SphereSearchTree(
+            verlet_list[i]->position, verlet_radius * 4.f );
         for ( unsigned j = 0; j < possibleCollisions.size(); ++j ) {
             unsigned id = possibleCollisions[j];
             if ( id == i ) {
                 continue;
             }
 
-            CheckCollisionBetweenVerlets( verlet_list[i].get(), verlet_list[id].get() );
+            CheckCollisionBetweenVerlets( verlet_list[i].get(),
+                                          verlet_list[id].get() );
         }
     }
 }
@@ -200,15 +207,19 @@ void VerletManager::Update() {
 
     ContainerCollision();
 
-    for ( int i = 0; i < THREAD_COUNT; ++i ) {
-        threads[i] = std::thread( &VerletManager::PositionUpdateThread, this, i );
-    }
-    for ( std::thread& thd : threads ) {
-        thd.join();
-    }
+    Stp->runTask();
+
+    // for ( int i = 0; i < THREAD_COUNT; ++i ) {
+    //     threads[i] =
+    //         std::thread( &VerletManager::PositionUpdateThread, this, i );
+    // }
+    // for ( std::thread& thd : threads ) {
+    //     thd.join();
+    // }
 }
 
-void VerletManager::CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 ) {
+void VerletManager::CheckCollisionBetweenVerlets( Verlet* Verlet1,
+                                                  Verlet* Verlet2 ) {
     if ( Verlet1 != Verlet2 ) {
         vec4 axis = vec_sub( Verlet1->position, Verlet2->position );
         float dist = vec_length( axis );
@@ -234,7 +245,8 @@ void VerletManager::ContainerCollision() {
 
             if ( dist > ( container.collision_radius - verlet_radius ) ) {
                 vec4 norm = vec_divide_f( disp, dist );
-                norm = vec_mul_f( norm, container.collision_radius - verlet_radius );
+                norm = vec_mul_f( norm,
+                                  container.collision_radius - verlet_radius );
                 vec_set( v->position, norm );
             }
         }
@@ -264,11 +276,11 @@ void VerletManager::ContainerCollision() {
     }
 }
 
-void VerletManager::PositionUpdateThread( int ThreadId ) noexcept {
-    unsigned start = ThreadId * ( curr_count / THREAD_COUNT );
-    unsigned end = ( ThreadId + 1 ) * ( curr_count / THREAD_COUNT );
+void VerletManager::PositionUpdateThread( unsigned ThreadId ) noexcept {
+    unsigned start = ThreadId * ( curr_count / ThreadCount );
+    unsigned end = ( ThreadId + 1 ) * ( curr_count / ThreadCount );
 
-    if ( ThreadId == THREAD_COUNT - 1 ) {
+    if ( ThreadId == ThreadCount - 1 ) {
         end = curr_count;
     }
 
@@ -288,7 +300,8 @@ void VerletManager::PositionUpdateThread( int ThreadId ) noexcept {
 
         verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
 
-        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z, 0.f );
+        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z,
+                   0.f );
         vec4 disp = vec_sub( verlet->position, verlet->old_position );
         vec_set( verlet->old_position, verlet->position );
 
@@ -320,7 +333,8 @@ void VerletManager::PositionUpdate() noexcept {
 
         verlet->acceleration = vec_add( verlet->acceleration, grav_vec );
 
-        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z, 0.f );
+        vec4 temp( verlet->position.x, verlet->position.y, verlet->position.z,
+                   0.f );
         vec4 disp = vec_sub( verlet->position, verlet->old_position );
         vec_set( verlet->old_position, verlet->position );
 
@@ -351,9 +365,8 @@ void VerletManager::DrawVerlets() {
         positions[positionCounter++] = verlet->position[1];
         positions[positionCounter++] = verlet->position[2];
 
-        velocities[velocityCounter++] = vec_distance( verlet->position,
-                                                      verlet->old_position ) *
-                                        10.f;
+        velocities[velocityCounter++] =
+            vec_distance( verlet->position, verlet->old_position ) * 10.f;
     }
 
     glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->position_VBO );
@@ -362,20 +375,23 @@ void VerletManager::DrawVerlets() {
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glBindBuffer( GL_ARRAY_BUFFER, model->GetMesh()->velocity_VBO );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count, velocities.data() );
+    glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( float ) * curr_count,
+                     velocities.data() );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glUseProgram( model->GetShader() );
 
-    glUniformMatrix4fv( glGetUniformLocation( model->GetShader(), "projection" ),
-                        1, GL_FALSE, &projection[0][0] );
+    glUniformMatrix4fv(
+        glGetUniformLocation( model->GetShader(), "projection" ), 1, GL_FALSE,
+        &projection[0][0] );
 
-    glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ), verlet_radius );
+    glUniform1f( glGetUniformLocation( model->GetShader(), "scale" ),
+                 verlet_radius );
 
     glBindVertexArray( model->GetMesh()->VAO );
 
-    glDrawArraysInstanced( model->GetRenderMethod(), 0, model->GetMesh()->num_vertices,
-                           curr_count );
+    glDrawArraysInstanced( model->GetRenderMethod(), 0,
+                           model->GetMesh()->num_vertices, curr_count );
 
     glUseProgram( 0 );
     glBindVertexArray( 0 );
@@ -383,9 +399,7 @@ void VerletManager::DrawVerlets() {
     Graphics::Instance().DrawNormal( container.model, container.matrix );
 }
 
-unsigned VerletManager::GetCurrCount() const {
-    return curr_count;
-}
+unsigned VerletManager::GetCurrCount() const { return curr_count; }
 
 void VerletManager::DisplayMenu() {
     ImGui::Begin( "VerletIntegration##1" );
@@ -429,19 +443,21 @@ void VerletManager::DisplayMenu() {
         SetupContainer( static_cast< ContainerShape >( currShape ) );
     }
 
-    if ( ImGui::SliderFloat( "Container size", &container.collision_radius, 2.f, 10.f ) ) {
+    if ( ImGui::SliderFloat( "Container size", &container.collision_radius, 2.f,
+                             10.f ) ) {
         switch ( container.shape ) {
         case Sphere:
             container.model_radius = container.collision_radius * 1.02f;
             break;
         case Cube:
-            container.model_radius = container.collision_radius * 2.f + 0.15f * 3.f;
+            container.model_radius =
+                container.collision_radius * 2.f + 0.15f * 3.f;
             break;
         }
 
-        container.matrix = glm::scale( glm::mat4( 1.f ), { container.model_radius,
-                                                           container.model_radius,
-                                                           container.model_radius } );
+        container.matrix = glm::scale(
+            glm::mat4( 1.f ), { container.model_radius, container.model_radius,
+                                container.model_radius } );
     }
 
     if ( ImGui::Button( "Reset" ) ) {

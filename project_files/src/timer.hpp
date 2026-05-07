@@ -30,7 +30,7 @@ struct Timer {
     void End( std::string message ) {
         end = std::chrono::steady_clock::now();
         duration = end - start;
-        Trace::Message( fmt::format( "{}: {}", message, duration.count() ) );
+        Trace::message( fmt::format( "{}: {}", message, duration.count() ) );
     }
 };
 

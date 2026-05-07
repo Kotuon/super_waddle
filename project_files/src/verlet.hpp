@@ -7,11 +7,11 @@
 #include <array>
 #include <memory>
 #include <queue>
-#include <thread>
 #include <vector>
 
 // System includes
 #include <glm/glm.hpp>
+#include "static_thread_pool.hpp"
 
 // Local includes
 #include "math.hpp"
@@ -46,7 +46,7 @@ public:
     void Update();
     void CollisionUpdate();
     void PositionUpdate() noexcept;
-    void PositionUpdateThread( int ThreadId ) noexcept;
+    void PositionUpdateThread( unsigned ThreadId ) noexcept;
 
     void DrawVerlets();
 
@@ -70,7 +70,7 @@ private:
 
     void CheckCollisionBetweenVerlets( Verlet* Verlet1, Verlet* Verlet2 );
 
-    void CheckCollisionsWithKDTree( int ThreadId );
+    void CheckCollisionsWithKDTree( unsigned ThreadId );
 
     void ContainerCollision();
 
@@ -86,8 +86,9 @@ private:
     vec4 force_position{ 0.f, 4.f, 0.f, 0.f };
     vec4 grav_vec{ 0.f, -4.5f, 0.f, 0.f };
 
-    int THREAD_COUNT = 32;
-    std::vector< std::thread > threads;
+    unsigned ThreadCount = 32;
+
+    std::unique_ptr< StaticThreadPool > Stp;
 
     std::unique_ptr< KDTree > kdtree;
     std::unique_ptr< Octree > octree;
